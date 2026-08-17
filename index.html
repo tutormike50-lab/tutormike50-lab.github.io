@@ -94,8 +94,36 @@ html, body {
 <script>
 ...
 </script>
+<script>
+async function testAircraftData() {
+    const status = document.querySelector(".status");
 
-</body>
-</html>
+    try {
+        const response = await fetch(
+            "https://api.airplanes.live/v2/point/50.1008/14.2600/10"
+        );
+
+        if (!response.ok) {
+            throw new Error("API error");
+        }
+
+        const data = await response.json();
+
+        if (data.ac && data.ac.length > 0) {
+            status.textContent =
+                "AIRCRAFT DATA RECEIVED — " +
+                data.ac.length +
+                " AIRCRAFT NEAR PRAGUE";
+        } else {
+            status.textContent = "CONNECTED — NO AIRCRAFT FOUND";
+        }
+
+    } catch (error) {
+        status.textContent = "API CONNECTION FAILED";
+    }
+}
+
+testAircraftData();
+</script>
 </body>
 </html>
