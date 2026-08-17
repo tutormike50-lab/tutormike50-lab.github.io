@@ -98,7 +98,11 @@ async function updateAircraft() {
             throw new Error("HTTP " + response.status);
         }
 
-        const data = await response.json();
+        const wrapper = await response.json();
+
+const data = wrapper.upstreamText
+    ? JSON.parse(wrapper.upstreamText)
+    : wrapper;
 
         if (!data.ac || data.ac.length === 0) {
             airline.textContent = "NO AIRCRAFT NEARBY";
