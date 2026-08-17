@@ -190,6 +190,19 @@ candidates.sort((a, b) =>
 );
 
 const aircraft = candidates[0];
+        candidates.forEach(ac => {
+    const id = ac.hex || ac.r || ac.flight;
+
+    previousDistances.set(
+        id,
+        distanceKm(
+            Number(ac.lat),
+            Number(ac.lon),
+            airportLat,
+            airportLon
+        )
+    );
+});
         );
 
         if (!aircraft) {
