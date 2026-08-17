@@ -21,7 +21,7 @@ html, body {
     left: 0;
     width: 100%;
     height: 105px;
-    background: rgba(0, 55, 110, 0.90);
+    background: rgb(0, 55, 110);
     color: white;
     display: flex;
     align-items: center;
@@ -86,14 +86,12 @@ html, body {
         </div>
 
         <div class="status">
-            INBOUND
+            TESTING LIVE DATA...
         </div>
     </div>
 
 </div>
-<script>
-...
-</script>
+
 <script>
 async function testAircraftData() {
     const status = document.querySelector(".status");
@@ -104,7 +102,7 @@ async function testAircraftData() {
         );
 
         if (!response.ok) {
-            throw new Error("API error");
+            throw new Error("HTTP " + response.status);
         }
 
         const data = await response.json();
@@ -120,10 +118,12 @@ async function testAircraftData() {
 
     } catch (error) {
         status.textContent = "API CONNECTION FAILED";
+        console.error(error);
     }
 }
 
 testAircraftData();
 </script>
+
 </body>
 </html>
