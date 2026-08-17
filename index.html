@@ -137,28 +137,52 @@ const data = wrapper.upstreamText
 function scoreAircraft(ac) {
     let score = 0;
 
-    // Prefer lower aircraft
     const altitude = Number(ac.alt_baro);
+    const verticalRate = Number(ac.baro_rate);
 
+    const distance = distanceKm(
+        Number(ac.lat),
+        Number(ac.lon),
+        airportLat,
+        airportLon
+    );
+
+    const id = ac.hex || ac.r || ac.flight;
+    const previous = previousDistances.get(id);
+
+    // Strongly prefer aircraft getting closer to Prague
+    if (previous !== undefined) {
+        if (distance < previous - 0.05) {
+            score += 100;
+        }
+
+        if (distance > previous + 0.05) {
+            score -= 100;
+        }
+    }
+
+    // Prefer aircraft close to the airport
+    if (distance < 3) score += 50;
+    else if (distance < 6) score += 35;
+    else if (distance < 10) score += 20;
+
+    // Prefer lower aircraft
     if (!isNaN(altitude)) {
-        if (altitude < 1500) score += 50;
-        else if (altitude < 3000) score += 35;
-        else if (altitude < 5000) score += 20;
+        if (altitude < 1500) score += 40;
+        else if (altitude < 3000) score += 25;
+        else if (altitude < 5000) score += 10;
     }
 
     // Prefer descending aircraft
-    const verticalRate = Number(ac.baro_rate);
-
     if (!isNaN(verticalRate) && verticalRate < -100) {
         score += 40;
     }
 
-    // Prefer aircraft with proper identification
-    if (ac.flight) score += 15;
-    if (ac.r) score += 10;
-    if (ac.t) score += 10;
+    if (ac.flight) score += 10;
+    if (ac.r) score += 5;
+    if (ac.t) score += 5;
 
-    return score;
+    return score
 }
 
 candidates.sort((a, b) =>
