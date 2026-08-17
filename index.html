@@ -111,8 +111,44 @@ const data = wrapper.upstreamText
             return;
         }
 
-        const aircraft = data.ac.find(ac =>
-            ac.flight || ac.r || ac.t
+        const candidates = data.ac.filter(ac =>
+    ac.lat &&
+    ac.lon &&
+    (ac.flight || ac.r || ac.t)
+);
+
+function scoreAircraft(ac) {
+    let score = 0;
+
+    // Prefer lower aircraft
+    const altitude = Number(ac.alt_baro);
+
+    if (!isNaN(altitude)) {
+        if (altitude < 1500) score += 50;
+        else if (altitude < 3000) score += 35;
+        else if (altitude < 5000) score += 20;
+    }
+
+    // Prefer descending aircraft
+    const verticalRate = Number(ac.baro_rate);
+
+    if (!isNaN(verticalRate) && verticalRate < -100) {
+        score += 40;
+    }
+
+    // Prefer aircraft with proper identification
+    if (ac.flight) score += 15;
+    if (ac.r) score += 10;
+    if (ac.t) score += 10;
+
+    return score;
+}
+
+candidates.sort((a, b) =>
+    scoreAircraft(b) - scoreAircraft(a)
+);
+
+const aircraft = candidates[0];
         );
 
         if (!aircraft) {
