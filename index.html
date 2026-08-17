@@ -1,3 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.ribbon {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 105px;
+    background: rgb(0, 55, 110);
+    color: white;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.airport {
+    width: 25%;
+    padding-left: 25px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.live {
+    color: #ff3333;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.aircraft {
+    width: 75%;
+    padding-left: 25px;
+    border-left: 2px solid rgba(255,255,255,0.25);
+}
+
+.airline {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.details {
+    font-size: 19px;
+    margin-top: 6px;
+    opacity: 0.9;
+}
+
+.status {
+    font-size: 16px;
+    margin-top: 5px;
+    color: #8fd3ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="ribbon">
+
+    <div class="airport">
+        <div class="live">● LIVE</div>
+        PRAGUE AIRPORT
+        <div>LKPR / PRG</div>
+    </div>
+
+    <div class="aircraft">
+        <div class="airline">LOADING AIRCRAFT...</div>
+        <div class="details">WAITING FOR LIVE DATA</div>
+        <div class="status">CONNECTING...</div>
+    </div>
+
+</div>
+
 <script>
 const airportLat = 50.1008;
 const airportLon = 14.2600;
@@ -70,30 +156,21 @@ async function updateAircraft() {
             const id = ac.hex || ac.r || ac.flight;
             const previous = previousDistances.get(id);
 
-            // Prefer aircraft getting closer to Prague
             if (previous !== undefined) {
-                if (distance < previous - 0.05) {
-                    score += 100;
-                }
-
-                if (distance > previous + 0.05) {
-                    score -= 100;
-                }
+                if (distance < previous - 0.05) score += 100;
+                if (distance > previous + 0.05) score -= 100;
             }
 
-            // Prefer aircraft close to the airport
             if (distance < 3) score += 50;
             else if (distance < 6) score += 35;
             else if (distance < 10) score += 20;
 
-            // Prefer lower aircraft
             if (!isNaN(altitude)) {
                 if (altitude < 1500) score += 40;
                 else if (altitude < 3000) score += 25;
                 else if (altitude < 5000) score += 10;
             }
 
-            // Prefer descending aircraft
             if (!isNaN(verticalRate) && verticalRate < -100) {
                 score += 40;
             }
@@ -154,4 +231,7 @@ async function updateAircraft() {
 
 updateAircraft();
 setInterval(updateAircraft, 10000);
-</script
+</script>
+
+</body>
+</html>
