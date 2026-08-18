@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>PRG ADS-B Monitor</title>
 
@@ -10,121 +10,76 @@
 body{
     margin:0;
     padding:20px;
-    background:#07111d;
-    color:white;
-    font-family:Arial,sans-serif;
+    background:#07111f;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
 h1{
-    margin:0 0 5px;
-    color:#65bfff;
+    margin:0 0 6px;
+    font-size:26px;
 }
 
 .subtitle{
-    color:#9db2c5;
+    color:#8fb8d8;
     margin-bottom:20px;
 }
 
-.status{
-    padding:12px;
+.panel{
+    background:#0d1c2d;
+    border:1px solid #244866;
+    border-radius:10px;
+    padding:15px;
     margin-bottom:18px;
-    background:#10243a;
-    border-radius:8px;
-    color:#8fd0ff;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-bottom:25px;
-}
-
-th{
-    text-align:left;
-    background:#12385b;
-    padding:9px;
-}
-
-td{
-    padding:8px;
-    border-bottom:1px solid #20364b;
-}
-
-tr.aircraft-row{
+.aircraft-row{
+    padding:10px;
+    margin:5px 0;
+    background:#13283e;
+    border-radius:6px;
     cursor:pointer;
 }
 
-tr.aircraft-row:hover{
-    background:#153451;
+.aircraft-row:hover{
+    background:#1c3b59;
 }
 
 .selected{
-    background:#194d75 !important;
+    border:2px solid #4db8ff;
 }
 
-.green{
-    color:#72e58b;
-}
-
-.orange{
-    color:#ffc15c;
-}
-
-.red{
-    color:#ff7272;
-}
-
-#monitor{
-    display:none;
-    background:#0c1d2e;
-    padding:18px;
-    border-radius:10px;
-    margin-top:15px;
-}
-
-.big{
-    font-size:27px;
+.title{
+    font-size:18px;
     font-weight:bold;
-    color:#72c7ff;
+    margin-bottom:10px;
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    margin-top:15px;
-}
-
-.box{
-    background:#122b43;
-    padding:12px;
+#raw{
+    background:#03080d;
+    color:#8dff9d;
+    padding:15px;
     border-radius:7px;
-}
-
-.label{
-    color:#89a6be;
-    font-size:12px;
-    margin-bottom:5px;
-}
-
-.value{
-    font-size:20px;
-    font-weight:bold;
+    overflow:auto;
+    white-space:pre-wrap;
+    word-break:break-word;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    line-height:1.45;
+    max-height:550px;
 }
 
 #history{
-    margin-top:20px;
-    max-height:420px;
-    overflow:auto;
-    font-family:monospace;
+    font-family:Consolas,monospace;
     font-size:13px;
-    background:#050b12;
-    padding:10px;
+    line-height:1.6;
+    max-height:450px;
+    overflow:auto;
 }
 
-.history-line{
-    border-bottom:1px solid #182330;
-    padding:5px;
+.small{
+    color:#8fb8d8;
+    font-size:13px;
 }
 </style>
 </head>
@@ -134,107 +89,61 @@ tr.aircraft-row:hover{
 <h1>PRG ADS-B MONITOR</h1>
 
 <div class="subtitle">
-Diagnostic page — click an aircraft to watch it.
+Click an aircraft to inspect everything the feed knows about it.
 </div>
 
-<div id="connection" class="status">
-Connecting to aircraft feed...
-</div>
+<div class="panel">
 
-<h2>Nearby aircraft</h2>
+    <div class="title">
+        AIRCRAFT NEAR PRG
+    </div>
 
-<table>
-
-<thead>
-<tr>
-<th>Flight</th>
-<th>Type</th>
-<th>Registration</th>
-<th>Air / Ground</th>
-<th>Altitude</th>
-<th>Speed</th>
-<th>Vertical</th>
-<th>Track</th>
-</tr>
-</thead>
-
-<tbody id="aircraftList"></tbody>
-
-</table>
-
-
-<div id="monitor">
-
-<div id="selectedName" class="big"></div>
-
-<div class="grid">
-
-<div class="box">
-<div class="label">AIR / GROUND</div>
-<div id="ground" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">ALTITUDE</div>
-<div id="altitude" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">GROUND SPEED</div>
-<div id="speed" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">VERTICAL RATE</div>
-<div id="vertical" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">TRACK</div>
-<div id="track" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">LATITUDE</div>
-<div id="latitude" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">LONGITUDE</div>
-<div id="longitude" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">POSITION AGE</div>
-<div id="seen" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">DISTANCE TO PRG</div>
-<div id="distance" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">CATEGORY</div>
-<div id="category" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">SQUAWK</div>
-<div id="squawk" class="value"></div>
-</div>
-
-<div class="box">
-<div class="label">NAV ALTITUDE</div>
-<div id="navalt" class="value"></div>
-</div>
+    <div id="aircraft">
+        Waiting for ADS-B...
+    </div>
 
 </div>
 
 
-<h3>Aircraft history — newest at top</h3>
+<div class="panel">
 
-<div id="history"></div>
+    <div class="title">
+        SELECTED AIRCRAFT
+    </div>
+
+    <div id="selected">
+        None
+    </div>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="title">
+        RAW ADS-B RECORD
+    </div>
+
+    <div class="small">
+        This is the complete aircraft object returned by our API.
+    </div>
+
+    <br>
+
+    <pre id="raw">Click an aircraft above.</pre>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="title">
+        MOVEMENT HISTORY
+    </div>
+
+    <div id="history">
+        No aircraft selected.
+    </div>
 
 </div>
 
@@ -244,23 +153,49 @@ Connecting to aircraft feed...
 const API =
 "https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
 
-
-const PRG={
+const PRG = {
     lat:50.1008,
     lon:14.2600
 };
 
-
 let selectedId=null;
-
-let selectedAircraft=null;
-
 let history=[];
 
 
-/* ================================
+/* =========================
+   DISTANCE
+========================= */
+
+function distanceKm(lat1,lon1,lat2,lon2){
+
+    const R=6371;
+
+    const dLat=
+        (lat2-lat1)*Math.PI/180;
+
+    const dLon=
+        (lon2-lon1)*Math.PI/180;
+
+    const a=
+        Math.sin(dLat/2)**2
+        +
+        Math.cos(lat1*Math.PI/180)
+        *
+        Math.cos(lat2*Math.PI/180)
+        *
+        Math.sin(dLon/2)**2;
+
+    return R*2*
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1-a)
+        );
+}
+
+
+/* =========================
    HELPERS
-================================ */
+========================= */
 
 function aircraftId(ac){
 
@@ -272,21 +207,7 @@ function aircraftId(ac){
 }
 
 
-function flight(ac){
-
-    return (
-        (ac.flight||"").trim()
-        ||
-        ac.r
-        ||
-        ac.hex
-        ||
-        "UNKNOWN"
-    );
-}
-
-
-function ground(ac){
+function isGround(ac){
 
     return (
         ac.alt_baro==="ground" ||
@@ -297,106 +218,34 @@ function ground(ac){
 
 function altitude(ac){
 
-    if(ground(ac))
+    if(isGround(ac))
         return "GROUND";
 
-    const a=
-        Number(ac.alt_baro);
+    if(ac.alt_baro!==undefined)
+        return ac.alt_baro;
 
-    if(Number.isFinite(a))
-        return Math.round(a)+" ft";
-
-    const g=
-        Number(ac.alt_geom);
-
-    if(Number.isFinite(g))
-        return Math.round(g)+" ft";
+    if(ac.alt_geom!==undefined)
+        return ac.alt_geom;
 
     return "—";
 }
 
 
-function vertical(ac){
+function verticalRate(ac){
 
-    let v=
-        Number(ac.baro_rate);
+    if(ac.baro_rate!==undefined)
+        return ac.baro_rate;
 
-    if(!Number.isFinite(v))
-        v=
-            Number(ac.geom_rate);
+    if(ac.geom_rate!==undefined)
+        return ac.geom_rate;
 
-    if(!Number.isFinite(v))
-        return "—";
-
-    if(v>0)
-        return "+"+Math.round(v)+" ft/min";
-
-    return Math.round(v)+" ft/min";
+    return "—";
 }
 
 
-function distanceKm(lat1,lon1,lat2,lon2){
-
-    const R=6371;
-
-    const dLat=
-        (lat2-lat1)*
-        Math.PI/180;
-
-    const dLon=
-        (lon2-lon1)*
-        Math.PI/180;
-
-    const a=
-
-        Math.sin(dLat/2)**2
-
-        +
-
-        Math.cos(lat1*Math.PI/180)
-
-        *
-
-        Math.cos(lat2*Math.PI/180)
-
-        *
-
-        Math.sin(dLon/2)**2;
-
-    return R*2*
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1-a)
-        );
-}
-
-
-function distanceFromPRG(ac){
-
-    const lat=
-        Number(ac.lat);
-
-    const lon=
-        Number(ac.lon);
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon)
-    )
-        return null;
-
-    return distanceKm(
-        lat,
-        lon,
-        PRG.lat,
-        PRG.lon
-    );
-}
-
-
-/* ================================
+/* =========================
    SELECT AIRCRAFT
-================================ */
+========================= */
 
 function selectAircraft(id){
 
@@ -404,436 +253,169 @@ function selectAircraft(id){
 
     history=[];
 
-    document
-    .getElementById("history")
-    .innerHTML="";
+    document.getElementById(
+        "history"
+    ).innerHTML=
+        "Recording...";
 
-    document
-    .getElementById("monitor")
-    .style.display="block";
 }
 
 
-/* ================================
-   AIRCRAFT LIST
-================================ */
+/* =========================
+   RAW RECORD
+========================= */
 
-function drawList(aircraft){
+function showRaw(ac){
 
-    const tbody=
-        document.getElementById(
-            "aircraftList"
+    /*
+       Sort the field names so it's
+       easier for us to inspect.
+    */
+
+    const sorted={};
+
+    Object.keys(ac)
+        .sort()
+        .forEach(key=>{
+
+            sorted[key]=ac[key];
+
+        });
+
+
+    document.getElementById(
+        "raw"
+    ).textContent=
+        JSON.stringify(
+            sorted,
+            null,
+            2
         );
-
-    tbody.innerHTML="";
-
-
-    const nearby=
-        aircraft
-        .map(ac=>{
-
-            return {
-                ac,
-                distance:
-                    distanceFromPRG(ac)
-            };
-
-        })
-
-        .filter(item=>
-            item.distance!==null &&
-            item.distance<15
-        )
-
-        .sort(
-            (a,b)=>
-            a.distance-b.distance
-        );
+}
 
 
-    for(const item of nearby){
+/* =========================
+   HISTORY
+========================= */
 
-        const ac=item.ac;
+function addHistory(ac){
 
-        const tr=
-            document.createElement("tr");
+    const lat=Number(ac.lat);
+    const lon=Number(ac.lon);
 
-        tr.className=
-            "aircraft-row";
+    let distance="—";
 
+    if(
+        Number.isFinite(lat) &&
+        Number.isFinite(lon)
+    ){
 
-        if(
-            aircraftId(ac)===
-            selectedId
-        )
-            tr.classList.add(
-                "selected"
-            );
-
-
-        tr.onclick=
-            ()=>
-            selectAircraft(
-                aircraftId(ac)
-            );
-
-
-        tr.innerHTML=`
-
-        <td>
-        ${flight(ac)}
-        </td>
-
-        <td>
-        ${ac.t||"—"}
-        </td>
-
-        <td>
-        ${ac.r||"—"}
-        </td>
-
-        <td class="${
-            ground(ac)
-            ? "orange"
-            : "green"
-        }">
-
-        ${
-            ground(ac)
-            ? "GROUND"
-            : "AIR"
-        }
-
-        </td>
-
-        <td>
-        ${altitude(ac)}
-        </td>
-
-        <td>
-        ${
-            Number.isFinite(
-                Number(ac.gs)
-            )
-            ? Math.round(ac.gs)+" kt"
-            : "—"
-        }
-        </td>
-
-        <td>
-        ${vertical(ac)}
-        </td>
-
-        <td>
-        ${
-            Number.isFinite(
-                Number(ac.track)
-            )
-            ? Math.round(ac.track)+"°"
-            : "—"
-        }
-        </td>
-
-        `;
-
-
-        tbody.appendChild(tr);
+        distance=
+            distanceKm(
+                lat,
+                lon,
+                PRG.lat,
+                PRG.lon
+            ).toFixed(2);
     }
 
 
-    document
-    .getElementById(
-        "connection"
-    )
-    .textContent=
-
-        "Feed working — "+
-        nearby.length+
-        " aircraft within 15 km of PRG";
-}
+    const time=
+        new Date()
+        .toLocaleTimeString();
 
 
-/* ================================
-   SELECTED AIRCRAFT
-================================ */
-
-function drawSelected(ac){
-
-    selectedAircraft=ac;
-
-
-    document
-    .getElementById(
-        "selectedName"
-    )
-    .textContent=
-
-        flight(ac)
-
-        +
-
-        (
-            ac.t
-            ? "  •  "+ac.t
-            : ""
-        )
-
-        +
-
-        (
-            ac.r
-            ? "  •  "+ac.r
-            : ""
-        );
-
-
-    document
-    .getElementById("ground")
-    .textContent=
-        ground(ac)
+    const state=
+        isGround(ac)
         ? "GROUND"
         : "AIR";
 
 
-    document
-    .getElementById("altitude")
-    .textContent=
+    const alt=
         altitude(ac);
 
 
-    document
-    .getElementById("speed")
-    .textContent=
-
-        Number.isFinite(
-            Number(ac.gs)
-        )
-
-        ? Math.round(ac.gs)+" kt"
-
+    const speed=
+        ac.gs!==undefined
+        ? ac.gs
         : "—";
 
 
-    document
-    .getElementById("vertical")
-    .textContent=
-        vertical(ac);
+    const vr=
+        verticalRate(ac);
 
 
-    document
-    .getElementById("track")
-    .textContent=
-
-        Number.isFinite(
-            Number(ac.track)
-        )
-
-        ? Math.round(ac.track)+"°"
-
+    const track=
+        ac.track!==undefined
+        ? ac.track
         : "—";
 
 
-    document
-    .getElementById("latitude")
-    .textContent=
-        ac.lat ?? "—";
-
-
-    document
-    .getElementById("longitude")
-    .textContent=
-        ac.lon ?? "—";
-
-
-    document
-    .getElementById("seen")
-    .textContent=
-
-        Number.isFinite(
-            Number(ac.seen_pos)
-        )
-
-        ? Number(ac.seen_pos)
-          .toFixed(1)+" sec"
-
+    const pos=
+        ac.seen_pos!==undefined
+        ? ac.seen_pos
         : "—";
 
 
-    const d=
-        distanceFromPRG(ac);
-
-
-    document
-    .getElementById("distance")
-    .textContent=
-
-        d!==null
-
-        ? d.toFixed(2)+" km"
-
-        : "—";
-
-
-    document
-    .getElementById("category")
-    .textContent=
-        ac.category||"—";
-
-
-    document
-    .getElementById("squawk")
-    .textContent=
-        ac.squawk||"—";
-
-
-    document
-    .getElementById("navalt")
-    .textContent=
-
-        Number.isFinite(
-            Number(ac.nav_altitude_mcp)
-        )
-
-        ? ac.nav_altitude_mcp+
-          " ft"
-
-        :
-
-        Number.isFinite(
-            Number(ac.nav_altitude_fms)
-        )
-
-        ? ac.nav_altitude_fms+
-          " ft"
-
-        : "—";
-
-
-    addHistory(ac);
-}
-
-
-/* ================================
-   HISTORY
-================================ */
-
-function addHistory(ac){
-
-    const now=
-        new Date();
-
-
-    const time=
-        now.toLocaleTimeString();
-
-
-    const d=
-        distanceFromPRG(ac);
-
-
-    const line={
-
-        time,
-
-        ground:
-            ground(ac)
-            ? "GROUND"
-            : "AIR",
-
-        altitude:
-            altitude(ac),
-
-        speed:
-            Number.isFinite(
-                Number(ac.gs)
-            )
-            ? Math.round(ac.gs)
-            : "—",
-
-        vertical:
-            vertical(ac),
-
-        track:
-            Number.isFinite(
-                Number(ac.track)
-            )
-            ? Math.round(ac.track)
-            : "—",
-
-        distance:
-            d!==null
-            ? d.toFixed(2)
-            : "—",
-
-        seen:
-            Number.isFinite(
-                Number(ac.seen_pos)
-            )
-            ? Number(ac.seen_pos)
-              .toFixed(1)
-            : "—"
-    };
+    const line=
+        time+
+        " | "+
+        state+
+        " | ALT "+
+        alt+
+        (
+            alt==="GROUND"
+            ? ""
+            : " ft"
+        )+
+        " | SPD "+
+        speed+
+        "kt"+
+        " | V/S "+
+        (
+            typeof vr==="number" &&
+            vr>0
+            ? "+"
+            : ""
+        )+
+        vr+
+        (
+            vr==="—"
+            ? ""
+            : " ft/min"
+        )+
+        " | TRK "+
+        track+
+        "°"+
+        " | PRG "+
+        distance+
+        "km"+
+        " | POS "+
+        pos+
+        "s";
 
 
     history.unshift(line);
 
 
+    /*
+       Keep 150 entries.
+    */
+
     if(history.length>150)
-        history.pop();
+        history.length=150;
 
 
-    const div=
-        document.getElementById(
-            "history"
-        );
-
-
-    div.innerHTML=
-        history
-        .map(item=>
-
-        `<div class="history-line">
-
-        ${item.time}
-
-        &nbsp; | &nbsp;
-
-        ${item.ground}
-
-        &nbsp; | &nbsp;
-
-        ALT ${item.altitude}
-
-        &nbsp; | &nbsp;
-
-        SPD ${item.speed}kt
-
-        &nbsp; | &nbsp;
-
-        V/S ${item.vertical}
-
-        &nbsp; | &nbsp;
-
-        TRK ${item.track}°
-
-        &nbsp; | &nbsp;
-
-        PRG ${item.distance}km
-
-        &nbsp; | &nbsp;
-
-        POS ${item.seen}s
-
-        </div>`
-
-        )
-        .join("");
+    document.getElementById(
+        "history"
+    ).innerHTML=
+        history.join("<br><br>");
 }
 
 
-/* ================================
-   UPDATE
-================================ */
+/* =========================
+   MAIN UPDATE
+========================= */
 
 async function update(){
 
@@ -841,22 +423,12 @@ async function update(){
 
         const response=
             await fetch(
-
                 API+
                 "?t="+
                 Date.now(),
-
                 {
                     cache:"no-store"
                 }
-
-            );
-
-
-        if(!response.ok)
-            throw new Error(
-                "HTTP "+
-                response.status
             );
 
 
@@ -865,41 +437,186 @@ async function update(){
 
 
         const aircraft=
-            (data.ac||[]);
+            (data.ac||[])
+            .filter(ac=>
+
+                Number.isFinite(
+                    Number(ac.lat)
+                )
+
+                &&
+
+                Number.isFinite(
+                    Number(ac.lon)
+                )
+
+            );
 
 
-        drawList(
-            aircraft
-        );
+        /*
+           Sort nearest PRG first.
+        */
 
+        aircraft.sort((a,b)=>{
+
+            const da=
+                distanceKm(
+                    Number(a.lat),
+                    Number(a.lon),
+                    PRG.lat,
+                    PRG.lon
+                );
+
+            const db=
+                distanceKm(
+                    Number(b.lat),
+                    Number(b.lon),
+                    PRG.lat,
+                    PRG.lon
+                );
+
+            return da-db;
+
+        });
+
+
+        const container=
+            document.getElementById(
+                "aircraft"
+            );
+
+
+        container.innerHTML="";
+
+
+        aircraft.forEach(ac=>{
+
+            const id=
+                aircraftId(ac);
+
+
+            if(!id)
+                return;
+
+
+            const d=
+                distanceKm(
+                    Number(ac.lat),
+                    Number(ac.lon),
+                    PRG.lat,
+                    PRG.lon
+                );
+
+
+            /*
+               Keep the debug list
+               reasonably local.
+            */
+
+            if(d>25)
+                return;
+
+
+            const row=
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className=
+                "aircraft-row";
+
+
+            if(id===selectedId)
+                row.classList.add(
+                    "selected"
+                );
+
+
+            const callsign=
+                (ac.flight||"")
+                .trim()
+                ||
+                "NO CALLSIGN";
+
+
+            const registration=
+                ac.r||"";
+
+
+            const type=
+                ac.t||"";
+
+
+            row.textContent=
+
+                callsign+
+                "   |   "+
+                registration+
+                "   |   "+
+                type+
+                "   |   "+
+                d.toFixed(2)+
+                " km";
+
+
+            row.onclick=()=>{
+
+                selectAircraft(id);
+
+                showRaw(ac);
+
+                document
+                .getElementById(
+                    "selected"
+                )
+                .textContent=
+
+                    callsign+
+                    "  •  "+
+                    registration+
+                    "  •  "+
+                    type;
+
+            };
+
+
+            container.appendChild(row);
+
+        });
+
+
+        /*
+           Update selected aircraft.
+        */
 
         if(selectedId){
 
-            const ac=
+            const selected=
                 aircraft.find(
-                    item=>
-                    aircraftId(item)===
+                    ac=>
+                    aircraftId(ac)
+                    ===
                     selectedId
                 );
 
 
-            if(ac)
-                drawSelected(ac);
+            if(selected){
+
+                showRaw(selected);
+
+                addHistory(selected);
+            }
         }
 
     }
 
     catch(error){
 
-        document
-        .getElementById(
-            "connection"
-        )
-        .textContent=
+        console.error(error);
 
-            "Feed error: "+
-            error.message;
     }
+
 }
 
 
