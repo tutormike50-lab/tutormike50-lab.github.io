@@ -80,12 +80,10 @@ html, body {
     height: 36px;
     left: 10%;
     top: 10px;
-
     transition:
         left 4.5s linear,
         top 4.5s linear,
         transform 0.8s ease;
-
     transform-origin: center center;
 }
 
@@ -111,7 +109,6 @@ html, body {
     height: 5px;
     background: rgba(255,255,255,0.9);
     opacity: 0;
-    transition: opacity 0.8s ease;
 }
 
 .runway.visible {
@@ -197,11 +194,11 @@ const airportLat = 50.1008;
 const airportLon = 14.2600;
 
 const previousDistances = new Map();
+const completedAircraft = new Map();
 
 let currentAircraftId = null;
 let landingLock = null;
-
-const completedAircraft = new Map();
+let departureLockId = null;
 
 
 const runways = [
@@ -232,19 +229,17 @@ const runways = [
 ];
 
 
-function distanceKm(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-) {
+function distanceKm(lat1, lon1, lat2, lon2) {
+
     const R = 6371;
 
     const dLat =
-        (lat2 - lat1) * Math.PI / 180;
+        (lat2 - lat1) *
+        Math.PI / 180;
 
     const dLon =
-        (lon2 - lon1) * Math.PI / 180;
+        (lon2 - lon1) *
+        Math.PI / 180;
 
     const a =
         Math.sin(dLat / 2) *
@@ -270,6 +265,7 @@ function bearingTo(
     lat2,
     lon2
 ) {
+
     const phi1 =
         lat1 * Math.PI / 180;
 
@@ -277,7 +273,8 @@ function bearingTo(
         lat2 * Math.PI / 180;
 
     const deltaLon =
-        (lon2 - lon1) * Math.PI / 180;
+        (lon2 - lon1) *
+        Math.PI / 180;
 
     const y =
         Math.sin(deltaLon) *
@@ -299,6 +296,7 @@ function bearingTo(
 
 
 function headingDifference(a, b) {
+
     let difference =
         Math.abs(a - b);
 
@@ -312,6 +310,7 @@ function headingDifference(a, b) {
 
 
 function aircraftId(ac) {
+
     return (
         ac.hex ||
         ac.r ||
@@ -322,6 +321,7 @@ function aircraftId(ac) {
 
 
 function numericAltitude(ac) {
+
     if (
         ac.alt_baro === "ground" ||
         ac.alt_baro === null ||
@@ -340,6 +340,7 @@ function numericAltitude(ac) {
 
 
 function closestRunway(track) {
+
     let best = null;
     let bestDifference = 999;
 
@@ -365,17 +366,18 @@ function closestRunway(track) {
 
 
 function clearDisplay() {
-    document
-        .querySelector(".airline")
-        .textContent = "";
 
-    document
-        .querySelector(".details")
-        .textContent = "";
+    document.querySelector(
+        ".airline"
+    ).textContent = "";
 
-    document
-        .querySelector(".status")
-        .textContent = "";
+    document.querySelector(
+        ".details"
+    ).textContent = "";
+
+    document.querySelector(
+        ".status"
+    ).textContent = "";
 
     updateApproachGraphic(
         null,
@@ -386,8 +388,8 @@ function clearDisplay() {
 
 
 function cleanCompletedAircraft() {
-    const now =
-        Date.now();
+
+    const now = Date.now();
 
     for (
         const [id, expiry]
@@ -439,6 +441,7 @@ function scoreArrival(ac) {
         return -9999;
     }
 
+
     if (
         id &&
         completedAircraft.has(id)
@@ -446,9 +449,11 @@ function scoreArrival(ac) {
         return -9999;
     }
 
+
     if (distance > 25) {
         return -9999;
     }
+
 
     if (
         altitude !== null &&
@@ -457,10 +462,6 @@ function scoreArrival(ac) {
         return -9999;
     }
 
-    /*
-       Climbing aircraft are
-       not arrivals.
-    */
 
     if (
         Number.isFinite(verticalRate) &&
@@ -486,9 +487,11 @@ function scoreArrival(ac) {
                 airportBearing
             );
 
+
         if (towardDifference > 55) {
             return -9999;
         }
+
 
         if (towardDifference < 20) {
             score += 200;
@@ -503,6 +506,7 @@ function scoreArrival(ac) {
 
         const runwayMatch =
             closestRunway(track);
+
 
         if (
             runwayMatch.difference < 15
@@ -527,16 +531,20 @@ function scoreArrival(ac) {
             ? previousDistances.get(id)
             : undefined;
 
+
     if (
         previousDistance !== undefined
     ) {
+
         const movement =
             previousDistance -
             distance;
 
+
         if (movement < -0.05) {
             return -9999;
         }
+
 
         if (movement > 0.15) {
             score += 200;
@@ -581,6 +589,7 @@ function scoreArrival(ac) {
     if (
         Number.isFinite(verticalRate)
     ) {
+
         if (verticalRate < -500) {
             score += 90;
         }
@@ -593,14 +602,6 @@ function scoreArrival(ac) {
     if (ac.flight) score += 15;
     if (ac.r) score += 10;
     if (ac.t) score += 10;
-
-
-    if (
-        id &&
-        id === currentAircraftId
-    ) {
-        score += 40;
-    }
 
 
     return score;
@@ -642,39 +643,26 @@ function scoreDeparture(ac) {
         );
 
 
-    /*
-       Must actually be airborne.
-    */
-
     if (ac.alt_baro === "ground") {
         return -9999;
     }
 
-
-    /*
-       Only recent departures.
-    */
 
     if (distance > 15) {
         return -9999;
     }
 
 
-    /*
-       Don't follow departures
-       into high altitude.
-    */
-
     if (
         altitude !== null &&
-        altitude > 6500
+        altitude > 3500
     ) {
         return -9999;
     }
 
 
     /*
-       Must be climbing.
+       MUST BE CLIMBING
     */
 
     if (
@@ -686,8 +674,8 @@ function scoreDeparture(ac) {
 
 
     /*
-       Direction should point
-       AWAY from Prague.
+       MUST BE POINTING AWAY
+       FROM PRAGUE
     */
 
     if (Number.isFinite(track)) {
@@ -706,6 +694,7 @@ function scoreDeparture(ac) {
                 awayBearing
             );
 
+
         if (awayDifference > 55) {
             return -9999;
         }
@@ -722,13 +711,9 @@ function scoreDeparture(ac) {
         }
 
 
-        /*
-           Track should broadly
-           match a Prague runway.
-        */
-
         const runwayMatch =
             closestRunway(track);
+
 
         if (
             runwayMatch.difference < 20
@@ -743,15 +728,11 @@ function scoreDeparture(ac) {
     }
 
 
-    /*
-       Confirm it is getting
-       farther away.
-    */
-
     const previousDistance =
         id
             ? previousDistances.get(id)
             : undefined;
+
 
     if (
         previousDistance !== undefined
@@ -761,9 +742,11 @@ function scoreDeparture(ac) {
             distance -
             previousDistance;
 
+
         if (movement < -0.05) {
             return -9999;
         }
+
 
         if (movement > 0.15) {
             score += 180;
@@ -773,11 +756,6 @@ function scoreDeparture(ac) {
         }
     }
 
-
-    /*
-       Prefer aircraft closest
-       to the airport.
-    */
 
     if (distance < 3) {
         score += 100;
@@ -792,11 +770,6 @@ function scoreDeparture(ac) {
         score += 10;
     }
 
-
-    /*
-       Strong climb gives
-       extra confidence.
-    */
 
     if (verticalRate > 1000) {
         score += 100;
@@ -819,7 +792,7 @@ function scoreDeparture(ac) {
 
 
 /* =========================
-   GRAPHIC
+   SIMPLE CURRENT GRAPHIC
    ========================= */
 
 function updateApproachGraphic(
@@ -966,8 +939,7 @@ async function updateAircraft() {
 
 
     /*
-       LOCK LANDED AIRCRAFT
-       FOR 10 SECONDS
+       LANDING LOCK
     */
 
     if (landingLock) {
@@ -1018,6 +990,7 @@ async function updateAircraft() {
 
 
         if (!response.ok) {
+
             throw new Error(
                 "HTTP " +
                 response.status
@@ -1042,15 +1015,13 @@ async function updateAircraft() {
             data.ac.length === 0
         ) {
 
+            departureLockId = null;
+
             clearDisplay();
+
             return;
         }
 
-
-        /*
-           UPDATE DISTANCE MEMORY
-           AFTER SELECTION
-        */
 
         const usableAircraft =
             data.ac.filter(ac => {
@@ -1070,7 +1041,13 @@ async function updateAircraft() {
 
 
         /*
-           ARRIVALS FIRST
+           SAVE DISTANCE MEMORY
+           AFTER WE HAVE SCORED.
+        */
+
+
+        /*
+           FIND ARRIVALS
         */
 
         const arrivals =
@@ -1090,11 +1067,166 @@ async function updateAircraft() {
                 );
 
 
+        /*
+           FIND ANY ARRIVAL
+           ALREADY ON SHORT FINAL
+           <= 3 KM TO ITS RUNWAY
+        */
+
+        let shortFinalArrival = null;
+
+
+        for (
+            const item of arrivals
+        ) {
+
+            const ac =
+                item.ac;
+
+            const track =
+                Number(ac.track);
+
+            if (
+                !Number.isFinite(track)
+            ) {
+                continue;
+            }
+
+
+            const match =
+                closestRunway(track);
+
+
+            if (
+                !match.runway ||
+                match.difference > 35
+            ) {
+                continue;
+            }
+
+
+            const thresholdDistance =
+                distanceKm(
+                    Number(ac.lat),
+                    Number(ac.lon),
+                    match.runway.lat,
+                    match.runway.lon
+                );
+
+
+            if (
+                thresholdDistance <= 3
+            ) {
+
+                shortFinalArrival =
+                    ac;
+
+                break;
+            }
+        }
+
+
+        /*
+           =========================
+           DEPARTURE LOCK PRIORITY
+           =========================
+
+           If we're already following
+           a departure, keep it until
+           3,000 ft unless an arrival
+           gets within 3 km.
+        */
+
+        let lockedDeparture = null;
+
+
+        if (departureLockId) {
+
+            lockedDeparture =
+                usableAircraft.find(
+                    ac =>
+                        aircraftId(ac) ===
+                        departureLockId
+                ) || null;
+
+
+            if (lockedDeparture) {
+
+                const depAltitude =
+                    numericAltitude(
+                        lockedDeparture
+                    );
+
+
+                /*
+                   RELEASE AT 3,000 FT
+                */
+
+                if (
+                    depAltitude !== null &&
+                    depAltitude >= 3000
+                ) {
+
+                    departureLockId =
+                        null;
+
+                    lockedDeparture =
+                        null;
+                }
+            }
+
+            else {
+
+                departureLockId =
+                    null;
+            }
+        }
+
+
+        /*
+           SHORT FINAL ALWAYS WINS
+        */
+
         let aircraft = null;
         let mode = null;
 
 
-        if (arrivals.length > 0) {
+        if (shortFinalArrival) {
+
+            aircraft =
+                shortFinalArrival;
+
+            mode =
+                "ARRIVAL";
+
+            departureLockId =
+                null;
+        }
+
+
+        /*
+           OTHERWISE KEEP LOCKED
+           DEPARTURE UNTIL 3,000 FT
+        */
+
+        else if (lockedDeparture) {
+
+            aircraft =
+                lockedDeparture;
+
+            mode =
+                "DEPARTURE";
+        }
+
+
+        /*
+           NO ACTIVE DEPARTURE?
+           THEN ARRIVAL HAS PRIORITY.
+        */
+
+        else if (
+            arrivals.length > 0
+        ) {
 
             aircraft =
                 arrivals[0].ac;
@@ -1106,7 +1238,7 @@ async function updateAircraft() {
 
         /*
            NO ARRIVAL?
-           TRY DEPARTURE.
+           FIND A NEW DEPARTURE.
         */
 
         if (!aircraft) {
@@ -1137,13 +1269,23 @@ async function updateAircraft() {
 
                 mode =
                     "DEPARTURE";
+
+
+                /*
+                   LOCK THIS DEPARTURE
+                */
+
+                departureLockId =
+                    aircraftId(
+                        aircraft
+                    );
             }
         }
 
 
         /*
-           SAVE DISTANCES FOR
-           NEXT 5-SECOND UPDATE
+           NOW SAVE POSITIONS
+           FOR NEXT UPDATE
         */
 
         usableAircraft
@@ -1153,6 +1295,7 @@ async function updateAircraft() {
                     aircraftId(ac);
 
                 if (!id) return;
+
 
                 previousDistances.set(
                     id,
@@ -1167,12 +1310,16 @@ async function updateAircraft() {
 
 
         /*
-           NOTHING RELEVANT
+           NOTHING ACTIVE
         */
 
         if (!aircraft) {
 
-            currentAircraftId = null;
+            currentAircraftId =
+                null;
+
+            departureLockId =
+                null;
 
             clearDisplay();
 
@@ -1211,12 +1358,12 @@ async function updateAircraft() {
             .join("  •  ");
 
 
-        const track =
-            Number(aircraft.track);
-
-
         const altitude =
             numericAltitude(aircraft);
+
+
+        const track =
+            Number(aircraft.track);
 
 
         const airportDistance =
@@ -1230,13 +1377,16 @@ async function updateAircraft() {
 
         /*
            =====================
-           ARRIVAL DISPLAY
+           ARRIVAL MODE
            =====================
         */
 
-        if (mode === "ARRIVAL") {
+        if (
+            mode === "ARRIVAL"
+        ) {
 
-            let selectedRunway = null;
+            let selectedRunway =
+                null;
 
 
             if (
@@ -1246,9 +1396,9 @@ async function updateAircraft() {
                 const match =
                     closestRunway(track);
 
+
                 if (
-                    match.difference <=
-                    35
+                    match.difference <= 35
                 ) {
 
                     selectedRunway =
@@ -1261,7 +1411,9 @@ async function updateAircraft() {
                 airportDistance;
 
 
-            if (selectedRunway) {
+            if (
+                selectedRunway
+            ) {
 
                 displayDistance =
                     distanceKm(
@@ -1272,6 +1424,10 @@ async function updateAircraft() {
                     );
             }
 
+
+            /*
+               TOUCHDOWN
+            */
 
             const reachedRunway =
                 selectedRunway &&
@@ -1298,6 +1454,10 @@ async function updateAircraft() {
                         Date.now() +
                         10000
                 };
+
+
+                departureLockId =
+                    null;
 
 
                 airline.textContent =
@@ -1330,6 +1490,7 @@ async function updateAircraft() {
             if (
                 displayDistance <= 8
             ) {
+
                 arrivalStatus =
                     "APPROACHING";
             }
@@ -1342,6 +1503,7 @@ async function updateAircraft() {
                     altitude < 2500
                 )
             ) {
+
                 arrivalStatus =
                     "ON FINAL";
             }
@@ -1386,13 +1548,16 @@ async function updateAircraft() {
 
         /*
            =====================
-           DEPARTURE DISPLAY
+           DEPARTURE MODE
            =====================
         */
 
-        if (mode === "DEPARTURE") {
+        if (
+            mode === "DEPARTURE"
+        ) {
 
-            let departureRunway = null;
+            let departureRunway =
+                null;
 
 
             if (
@@ -1402,10 +1567,12 @@ async function updateAircraft() {
                 const match =
                     closestRunway(track);
 
+
                 if (
                     match.difference <=
                     40
                 ) {
+
                     departureRunway =
                         match.runway;
                 }
@@ -1416,7 +1583,11 @@ async function updateAircraft() {
                 "DEPARTED";
 
 
-            if (airportDistance > 3) {
+            if (
+                altitude !== null &&
+                altitude >= 1000
+            ) {
+
                 departureStatus =
                     "CLIMBING";
             }
@@ -1430,6 +1601,13 @@ async function updateAircraft() {
                 detailText;
 
 
+            /*
+               Departure status now
+               shows altitude, because
+               3,000 ft is our handover
+               point.
+            */
+
             status.textContent =
                 departureStatus +
 
@@ -1442,18 +1620,21 @@ async function updateAircraft() {
 
                 "  •  " +
 
-                airportDistance
-                    .toFixed(1) +
-
-                " KM";
+                (
+                    altitude !== null
+                        ? Math.round(
+                            altitude
+                          ).toLocaleString() +
+                          " FT"
+                        : airportDistance
+                            .toFixed(1) +
+                          " KM"
+                );
 
 
             /*
-               Keep graphic hidden for
-               departures for now.
-
-               We'll build the proper
-               takeoff animation later.
+               Hide the temporary graphic
+               for departures for now.
             */
 
             updateApproachGraphic(
