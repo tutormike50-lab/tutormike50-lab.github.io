@@ -143,7 +143,6 @@ function scoreAircraft(ac) {
     );
 
     const altitude = numericAltitude(ac);
-
     const verticalRate = Number(ac.baro_rate);
 
     const previousDistance =
@@ -158,22 +157,15 @@ function scoreAircraft(ac) {
         const change =
             previousDistance - distance;
 
-        // Clearly getting closer
         if (change > 0.15) {
             score += 160;
         }
-
-        // Slightly getting closer
         else if (change > 0.03) {
             score += 100;
         }
-
-        // Clearly moving away
         else if (change < -0.15) {
             score -= 180;
         }
-
-        // Slightly moving away
         else if (change < -0.03) {
             score -= 100;
         }
@@ -222,22 +214,15 @@ function scoreAircraft(ac) {
 
     if (Number.isFinite(verticalRate)) {
 
-        // Strongly descending
         if (verticalRate < -500) {
             score += 70;
         }
-
-        // Gently descending
         else if (verticalRate < -100) {
             score += 45;
         }
-
-        // Strong climb = probably departure
         else if (verticalRate > 700) {
             score -= 90;
         }
-
-        // Moderate climb
         else if (verticalRate > 250) {
             score -= 50;
         }
@@ -253,9 +238,6 @@ function scoreAircraft(ac) {
 
     /*
        KEEP CURRENT AIRCRAFT STABLE
-
-       This helps stop the ribbon jumping
-       between two similar aircraft.
     */
 
     if (id && id === currentAircraftId) {
@@ -346,8 +328,7 @@ async function updateAircraft() {
             aircraftId(aircraft);
 
         /*
-           Save current distances AFTER
-           selecting the aircraft.
+           SAVE CURRENT DISTANCES
         */
 
         candidates.forEach(ac => {
@@ -395,6 +376,23 @@ async function updateAircraft() {
                 airportLon
             );
 
+        /*
+           ARRIVAL STATUS
+        */
+
+        let arrivalStatus =
+            "INBOUND";
+
+        if (distance <= 8) {
+            arrivalStatus =
+                "APPROACHING";
+        }
+
+        if (distance <= 4) {
+            arrivalStatus =
+                "ON FINAL";
+        }
+
         airline.textContent =
             callsign;
 
@@ -404,7 +402,10 @@ async function updateAircraft() {
             registration;
 
         status.textContent =
-            "LIVE AIRCRAFT DATA";
+            arrivalStatus +
+            "  •  " +
+            distance.toFixed(1) +
+            " KM";
 
     }
 
@@ -429,6 +430,6 @@ setInterval(
     updateAircraft,
     10000
 );
-</script>
+</script>>
 </body>
 </html>
