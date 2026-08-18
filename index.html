@@ -186,34 +186,15 @@ html, body {
 
 <script>
 
-/* ==============================
-   AIRPORT
-   ============================== */
-
 const airportLat = 50.1008;
 const airportLon = 14.2600;
-
-
-/* ==============================
-   MEMORY
-   ============================== */
 
 const previousDistances = new Map();
 const completedAircraft = new Map();
 
 let landingLock = null;
-
-/*
-   This stores the aircraft we
-   have identified as taking off.
-*/
-
 let departureLockId = null;
 
-
-/* ==============================
-   RUNWAYS
-   ============================== */
 
 const runways = [
 
@@ -246,6 +227,77 @@ const runways = [
     }
 
 ];
+
+
+/* ==============================
+   AIRLINE NAMES
+   ============================== */
+
+const airlines = {
+
+    RYR: "RYANAIR",
+    BAW: "BRITISH AIRWAYS",
+    KLM: "KLM",
+    DLH: "LUFTHANSA",
+    TVS: "SMARTWINGS",
+    EZY: "EASYJET",
+    WZZ: "WIZZ AIR",
+    UAE: "EMIRATES",
+    QTR: "QATAR AIRWAYS",
+    THY: "TURKISH AIRLINES",
+    AFR: "AIR FRANCE",
+    SWR: "SWISS",
+    AUA: "AUSTRIAN AIRLINES",
+    LOT: "LOT POLISH AIRLINES",
+    SAS: "SAS",
+    FIN: "FINNAIR",
+    IBE: "IBERIA",
+    TAP: "TAP AIR PORTUGAL",
+    ITY: "ITA AIRWAYS",
+    EIN: "AER LINGUS",
+    VLG: "VUELING",
+    EWG: "EUROWINGS",
+    AEE: "AEGEAN AIRLINES",
+    CSA: "CZECH AIRLINES",
+    BTI: "AIRBALTIC",
+    BEL: "BRUSSELS AIRLINES",
+    TRA: "TRANSAVIA",
+    EXS: "JET2",
+    TUI: "TUI",
+    ACA: "AIR CANADA",
+    AAL: "AMERICAN AIRLINES",
+    DAL: "DELTA AIR LINES",
+    UAL: "UNITED AIRLINES",
+    SIA: "SINGAPORE AIRLINES",
+    CPA: "CATHAY PACIFIC",
+    ETD: "ETIHAD AIRWAYS",
+    ELY: "EL AL",
+    RAM: "ROYAL AIR MAROC",
+    MSR: "EGYPTAIR",
+    PGT: "PEGASUS AIRLINES"
+};
+
+
+function airlineNameFromCallsign(callsign) {
+
+    if (!callsign) {
+        return "";
+    }
+
+    const clean =
+        callsign
+            .trim()
+            .toUpperCase();
+
+    if (clean.length < 3) {
+        return "";
+    }
+
+    const prefix =
+        clean.substring(0, 3);
+
+    return airlines[prefix] || "";
+}
 
 
 /* ==============================
@@ -455,11 +507,6 @@ function scoreArrival(ac) {
         );
 
 
-    /*
-       GROUND AIRCRAFT CANNOT
-       BE ARRIVALS.
-    */
-
     if (
         ac.alt_baro === "ground"
     ) {
@@ -488,10 +535,6 @@ function scoreArrival(ac) {
     }
 
 
-    /*
-       CLIMBING = NOT ARRIVING
-    */
-
     if (
         Number.isFinite(verticalRate) &&
         verticalRate > 250
@@ -499,11 +542,6 @@ function scoreArrival(ac) {
         return -9999;
     }
 
-
-    /*
-       MUST MATCH A RUNWAY
-       REASONABLY WELL.
-    */
 
     if (
         Number.isFinite(track)
@@ -531,11 +569,6 @@ function scoreArrival(ac) {
         }
     }
 
-
-    /*
-       MUST GENERALLY BE
-       GETTING CLOSER.
-    */
 
     const previousDistance =
         id
@@ -584,10 +617,14 @@ function scoreArrival(ac) {
         Number.isFinite(verticalRate)
     ) {
 
-        if (verticalRate < -500) {
+        if (
+            verticalRate < -500
+        ) {
             score += 100;
         }
-        else if (verticalRate < -100) {
+        else if (
+            verticalRate < -100
+        ) {
             score += 60;
         }
     }
@@ -610,12 +647,6 @@ function scoreTakeoffRoll(ac) {
 
     let score = 0;
 
-
-    /*
-       THIS DETECTOR IS
-       SPECIFICALLY FOR AIRCRAFT
-       STILL REPORTING GROUND.
-    */
 
     if (
         ac.alt_baro !== "ground"
@@ -654,26 +685,12 @@ function scoreTakeoffRoll(ac) {
         );
 
 
-    /*
-       MUST BE ON / VERY CLOSE
-       TO THE AIRPORT.
-    */
-
     if (
         airportDistance > 3.5
     ) {
         return -9999;
     }
 
-
-    /*
-       TAXIING AIRCRAFT SHOULD
-       NOT TRIGGER THE RIBBON.
-
-       70 knots is deliberately
-       conservative enough to
-       catch the takeoff roll.
-    */
 
     if (speed < 70) {
         return -9999;
@@ -683,11 +700,6 @@ function scoreTakeoffRoll(ac) {
     score += 150;
 
 
-    /*
-       FASTER = MUCH MORE LIKELY
-       TO BE TAKING OFF.
-    */
-
     if (speed >= 100) {
         score += 150;
     }
@@ -696,11 +708,6 @@ function scoreTakeoffRoll(ac) {
         score += 100;
     }
 
-
-    /*
-       MUST BE ALIGNED WITH
-       A RUNWAY.
-    */
 
     if (
         Number.isFinite(track)
@@ -726,7 +733,6 @@ function scoreTakeoffRoll(ac) {
             score += 100;
         }
     }
-
     else {
 
         return -9999;
@@ -797,15 +803,6 @@ function scoreAirborneDeparture(ac) {
     }
 
 
-    /*
-       AFTER LIFTOFF WE DON'T
-       REQUIRE BARO RATE TO
-       EXIST IMMEDIATELY.
-
-       IF IT DOES EXIST, A
-       STRONG DESCENT IS WRONG.
-    */
-
     if (
         Number.isFinite(verticalRate) &&
         verticalRate < -100
@@ -821,10 +818,6 @@ function scoreAirborneDeparture(ac) {
         score += 150;
     }
 
-
-    /*
-       RUNWAY HEADING
-    */
 
     if (
         Number.isFinite(track)
@@ -852,10 +845,6 @@ function scoreAirborneDeparture(ac) {
     }
 
 
-    /*
-       MOVING AWAY FROM AIRPORT
-    */
-
     const previousDistance =
         id
             ? previousDistances.get(id)
@@ -871,24 +860,25 @@ function scoreAirborneDeparture(ac) {
             previousDistance;
 
 
-        if (movement < -0.08) {
+        if (
+            movement < -0.08
+        ) {
             return -9999;
         }
 
 
-        if (movement > 0.15) {
+        if (
+            movement > 0.15
+        ) {
             score += 200;
         }
-        else if (movement > 0.03) {
+        else if (
+            movement > 0.03
+        ) {
             score += 100;
         }
     }
 
-
-    /*
-       CLOSE TO AIRPORT =
-       LIKELY RECENT TAKEOFF
-    */
 
     if (distance < 3) {
         score += 150;
@@ -1077,10 +1067,6 @@ async function updateAircraft() {
     cleanCompletedAircraft();
 
 
-    /*
-       FINISHED LANDING LOCK
-    */
-
     if (landingLock) {
 
         if (
@@ -1173,12 +1159,6 @@ async function updateAircraft() {
             });
 
 
-        /*
-           ======================
-           ARRIVALS
-           ======================
-        */
-
         const arrivals =
             allAircraft
                 .map(ac => ({
@@ -1195,11 +1175,6 @@ async function updateAircraft() {
                         a.score
                 );
 
-
-        /*
-           SHORT FINAL
-           <= 3 KM TO THRESHOLD
-        */
 
         let shortFinalArrival =
             null;
@@ -1256,12 +1231,6 @@ async function updateAircraft() {
         }
 
 
-        /*
-           ======================
-           EXISTING DEPARTURE LOCK
-           ======================
-        */
-
         let lockedDeparture =
             null;
 
@@ -1284,11 +1253,6 @@ async function updateAircraft() {
                     );
 
 
-                /*
-                   RELEASE AFTER
-                   3,000 FT
-                */
-
                 if (
                     altitude !== null &&
                     altitude >= 3000
@@ -1308,12 +1272,6 @@ async function updateAircraft() {
             }
         }
 
-
-        /*
-           ======================
-           TAKEOFF ROLL
-           ======================
-        */
 
         const takeoffRolls =
             allAircraft
@@ -1338,12 +1296,6 @@ async function updateAircraft() {
                 : null;
 
 
-        /*
-           ======================
-           AIRBORNE DEPARTURES
-           ======================
-        */
-
         const departures =
             allAircraft
                 .map(ac => ({
@@ -1366,19 +1318,6 @@ async function updateAircraft() {
                 ? departures[0].ac
                 : null;
 
-
-        /*
-           ======================
-           BROADCAST PRIORITY
-
-           1 SHORT FINAL
-           2 LOCKED DEPARTURE
-           3 TAKEOFF ROLL
-           4 NEW DEPARTURE
-           5 NORMAL ARRIVAL
-           6 BLANK
-           ======================
-        */
 
         let aircraft = null;
         let mode = null;
@@ -1452,11 +1391,6 @@ async function updateAircraft() {
         }
 
 
-        /*
-           STORE CURRENT DISTANCES
-           FOR NEXT UPDATE
-        */
-
         allAircraft.forEach(ac => {
 
             const id =
@@ -1500,6 +1434,22 @@ async function updateAircraft() {
                 : "AIRCRAFT";
 
 
+        const airlineName =
+            airlineNameFromCallsign(
+                callsign
+            );
+
+
+        const headline =
+            airlineName
+
+                ? airlineName +
+                  "  •  " +
+                  callsign
+
+                : callsign;
+
+
         const registration =
             aircraft.r || "";
 
@@ -1530,9 +1480,7 @@ async function updateAircraft() {
 
 
         /*
-           ======================
-           TAKEOFF ROLL DISPLAY
-           ======================
+           TAKEOFF ROLL
         */
 
         if (
@@ -1550,7 +1498,7 @@ async function updateAircraft() {
 
 
             airline.textContent =
-                callsign;
+                headline;
 
 
             details.textContent =
@@ -1578,11 +1526,6 @@ async function updateAircraft() {
                 " KT";
 
 
-            /*
-               We'll create the fancy
-               takeoff graphic later.
-            */
-
             updateApproachGraphic(
                 null,
                 0,
@@ -1595,9 +1538,7 @@ async function updateAircraft() {
 
 
         /*
-           ======================
-           DEPARTURE DISPLAY
-           ======================
+           DEPARTURE
         */
 
         if (
@@ -1629,7 +1570,7 @@ async function updateAircraft() {
 
 
             airline.textContent =
-                callsign;
+                headline;
 
 
             details.textContent =
@@ -1669,9 +1610,7 @@ async function updateAircraft() {
 
 
         /*
-           ======================
-           ARRIVAL DISPLAY
-           ======================
+           ARRIVAL
         */
 
         if (
@@ -1723,10 +1662,6 @@ async function updateAircraft() {
             }
 
 
-            /*
-               TOUCHDOWN
-            */
-
             if (
                 selectedRunway &&
                 displayDistance <= 0.8
@@ -1736,7 +1671,8 @@ async function updateAircraft() {
 
                     id,
 
-                    callsign,
+                    callsign:
+                        headline,
 
                     details:
                         detailText,
@@ -1751,7 +1687,7 @@ async function updateAircraft() {
 
 
                 airline.textContent =
-                    callsign;
+                    headline;
 
 
                 details.textContent =
@@ -1800,7 +1736,7 @@ async function updateAircraft() {
 
 
             airline.textContent =
-                callsign;
+                headline;
 
 
             details.textContent =
@@ -1845,10 +1781,6 @@ async function updateAircraft() {
     }
 }
 
-
-/* ==============================
-   START
-   ============================== */
 
 updateAircraft();
 
