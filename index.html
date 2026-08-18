@@ -35,8 +35,7 @@ html,body{
     border-top:2px solid #45aaff;
 
     box-shadow:
-        0 -3px 15px
-        rgba(0,100,220,.35);
+        0 -3px 15px rgba(0,100,220,.35);
 
     color:white;
 
@@ -46,45 +45,113 @@ html,body{
     box-sizing:border-box;
 }
 
+
+/* =========================
+   PRG
+========================= */
+
 .airport{
-    width:22%;
+    width:13%;
     height:75%;
-
-    padding-left:24px;
-
-    box-sizing:border-box;
 
     display:flex;
     flex-direction:column;
     justify-content:center;
+    align-items:center;
+
+    box-sizing:border-box;
 
     border-right:
         1px solid
-        rgba(255,255,255,.35);
+        rgba(255,255,255,.30);
 }
 
 .live{
     font-size:13px;
     font-weight:bold;
+
     color:#ff5757;
-    margin-bottom:5px;
+
+    margin-bottom:4px;
 }
 
-.airport-name{
-    font-size:21px;
-    font-weight:bold;
+.prg{
+    font-size:34px;
+    font-weight:900;
+
+    letter-spacing:2px;
 }
 
-.airport-code{
-    margin-top:3px;
-    font-size:14px;
-    color:#b9e2ff;
-    letter-spacing:1.5px;
+
+/* =========================
+   LOGO
+========================= */
+
+.logo-area{
+    width:12%;
+    height:75%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    box-sizing:border-box;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,.22);
 }
+
+.airline-logo{
+    max-width:78px;
+    max-height:55px;
+
+    object-fit:contain;
+
+    display:none;
+
+    filter:
+        drop-shadow(
+            0 2px 4px
+            rgba(0,0,0,.35)
+        );
+}
+
+.logo-fallback{
+    width:58px;
+    height:58px;
+
+    border-radius:50%;
+
+    background:
+        rgba(0,20,50,.35);
+
+    border:
+        2px solid
+        rgba(255,255,255,.65);
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    font-size:17px;
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    color:white;
+}
+
+
+/* =========================
+   AIRCRAFT INFO
+========================= */
 
 .info{
-    width:53%;
-    padding-left:28px;
+    width:50%;
+
+    padding-left:24px;
+
     box-sizing:border-box;
 }
 
@@ -99,9 +166,21 @@ html,body{
 
 .details{
     margin-top:7px;
+
     font-size:17px;
-    color:rgba(255,255,255,.82);
+
+    color:
+        rgba(255,255,255,.82);
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
+
+
+/* =========================
+   STATUS
+========================= */
 
 .status{
     width:25%;
@@ -129,15 +208,28 @@ html,body{
             ● LIVE
         </div>
 
-        <div class="airport-name">
-            PRAGUE AIRPORT
-        </div>
-
-        <div class="airport-code">
-            LKPR / PRG
+        <div class="prg">
+            PRG
         </div>
 
     </div>
+
+
+    <div class="logo-area">
+
+        <img
+            id="airlineLogo"
+            class="airline-logo"
+            alt=""
+        >
+
+        <div
+            id="logoFallback"
+            class="logo-fallback"
+        ></div>
+
+    </div>
+
 
     <div class="info">
 
@@ -146,6 +238,7 @@ html,body{
         <div class="details"></div>
 
     </div>
+
 
     <div class="status"></div>
 
@@ -199,6 +292,131 @@ const airlines={
     CFG:"CONDOR"
 
 };
+
+
+/* =========================================================
+   LOGO MAP
+
+   If a logo cannot load,
+   we automatically show
+   the airline code instead.
+========================================================= */
+
+const logoSlugs={
+
+    RYR:"ryanair",
+    UAE:"emirates",
+    AUA:"austrianairlines",
+    DLH:"lufthansa",
+    KLM:"klm",
+    BAW:"britishairways",
+    EZY:"easyjet",
+    WZZ:"wizzair",
+    QTR:"qatarairways",
+    THY:"turkishairlines",
+    AFR:"airfrance",
+    SWR:"swiss",
+    LOT:"lotpolishairlines",
+    SAS:"sas",
+    FIN:"finnair",
+    IBE:"iberia",
+    TAP:"tapairportugal",
+    EIN:"aerlingus",
+    EWG:"eurowings",
+    AEE:"aegeanairlines",
+    CFG:"condor"
+
+};
+
+
+function airlinePrefix(ac){
+
+    const callsign=
+        (ac.flight||"")
+        .trim()
+        .toUpperCase();
+
+
+    if(callsign.length<3)
+        return "";
+
+
+    return callsign.substring(0,3);
+}
+
+
+function updateLogo(ac){
+
+    const prefix=
+        airlinePrefix(ac);
+
+
+    const img=
+        document.getElementById(
+            "airlineLogo"
+        );
+
+
+    const fallback=
+        document.getElementById(
+            "logoFallback"
+        );
+
+
+    img.style.display="none";
+    fallback.style.display="none";
+
+
+    if(!prefix)
+        return;
+
+
+    const slug=
+        logoSlugs[prefix];
+
+
+    if(!slug){
+
+        fallback.textContent=
+            prefix;
+
+        fallback.style.display=
+            "flex";
+
+        return;
+    }
+
+
+    img.onload=function(){
+
+        fallback.style.display=
+            "none";
+
+        img.style.display=
+            "block";
+    };
+
+
+    img.onerror=function(){
+
+        img.style.display=
+            "none";
+
+        fallback.textContent=
+            prefix;
+
+        fallback.style.display=
+            "flex";
+    };
+
+
+    img.src=
+        "https://cdn.simpleicons.org/"
+        +
+        slug
+        +
+        "/ffffff";
+}
 
 
 /* =========================================================
@@ -306,6 +524,7 @@ function unwantedAircraft(ac){
         .trim()
         .toUpperCase();
 
+
     const category=
         (ac.category||"")
         .trim()
@@ -333,8 +552,6 @@ function unwantedAircraft(ac){
 
 /* =========================================================
    MEMORY
-
-   Every aircraft gets its own short history.
 ========================================================= */
 
 const aircraftMemory=
@@ -442,20 +659,6 @@ function freshPosition(ac){
 }
 
 
-function headingDifference(a,b){
-
-    let d=
-        Math.abs(a-b);
-
-
-    if(d>180)
-        d=360-d;
-
-
-    return d;
-}
-
-
 function distanceKm(
     lat1,
     lon1,
@@ -523,8 +726,7 @@ function distanceToRunway(
         )/3;
 
 
-    const ky=
-        111.32;
+    const ky=111.32;
 
 
     const kx=
@@ -624,8 +826,7 @@ function nearestRunwayDistance(ac){
         return 999;
 
 
-    let best=
-        999;
+    let best=999;
 
 
     for(const runway of physicalRunways){
@@ -674,7 +875,6 @@ function nearestThreshold(ac){
 
 
     let best=null;
-
     let bestDistance=999;
 
 
@@ -692,7 +892,6 @@ function nearestThreshold(ac){
         if(d<bestDistance){
 
             bestDistance=d;
-
             best=end;
         }
     }
@@ -706,7 +905,7 @@ function nearestThreshold(ac){
 
 
 /* =========================================================
-   AIRLINE DISPLAY
+   DISPLAY
 ========================================================= */
 
 function airlineName(callsign){
@@ -778,6 +977,9 @@ function showState(ac,state){
     .querySelector(".status")
     .textContent=
         state;
+
+
+    updateLogo(ac);
 }
 
 
@@ -796,6 +998,22 @@ function clearDisplay(){
     document
     .querySelector(".status")
     .textContent="";
+
+
+    document
+    .getElementById(
+        "airlineLogo"
+    )
+    .style.display=
+        "none";
+
+
+    document
+    .getElementById(
+        "logoFallback"
+    )
+    .style.display=
+        "none";
 }
 
 
@@ -819,10 +1037,6 @@ function getMemory(id){
                 wasNearRunwayGround:false,
 
                 lastNearRunwayGround:0,
-
-                departureCandidate:false,
-
-                departureCandidateSince:0,
 
                 lastSeen:Date.now()
             }
@@ -896,9 +1110,6 @@ function addSample(ac){
         vertical:
             verticalRate(ac),
 
-        track:
-            Number(ac.track),
-
         positionAge:
             positionAge(ac),
 
@@ -917,11 +1128,6 @@ function addSample(ac){
     memory.samples.push(sample);
 
 
-    /*
-       Keep about 3 minutes
-       of samples.
-    */
-
     const cutoff=
         Date.now()-
         180000;
@@ -938,14 +1144,6 @@ function addSample(ac){
     memory.lastSeen=
         Date.now();
 
-
-    /*
-       Remember any fresh ground
-       aircraft near a runway.
-
-       This is useful when ADS-B
-       later jumps directly to AIR.
-    */
 
     if(
         sample.ground
@@ -965,13 +1163,7 @@ function addSample(ac){
 
 
 /* =========================================================
-   ARRIVAL CANDIDATE
-
-   We remember arrivals internally
-   from up to 20 km away.
-
-   Viewer still only sees them
-   inside 3 km.
+   ARRIVAL MEMORY
 ========================================================= */
 
 function updateArrivalCandidate(ac){
@@ -1006,11 +1198,6 @@ function updateArrivalCandidate(ac){
         ];
 
 
-    /*
-       Ignore aircraft already
-       clearly climbing away.
-    */
-
     if(latest.vertical>900)
         return;
 
@@ -1018,11 +1205,6 @@ function updateArrivalCandidate(ac){
     if(latest.airportDistance>20)
         return;
 
-
-    /*
-       Need some evidence of descent
-       OR relatively low altitude.
-    */
 
     const alt=
         latest.altitude;
@@ -1045,14 +1227,6 @@ function updateArrivalCandidate(ac){
         return;
 
 
-    /*
-       Examine last few fresh samples.
-
-       Aircraft may circle or temporarily
-       fly away, so we do NOT require
-       every distance sample to decrease.
-    */
-
     const recent=
         samples
         .filter(
@@ -1069,7 +1243,6 @@ function updateArrivalCandidate(ac){
 
 
     let closerCount=0;
-
     let descendingCount=0;
 
 
@@ -1102,11 +1275,6 @@ function updateArrivalCandidate(ac){
     }
 
 
-    /*
-       Enough evidence to remember
-       this aircraft as a likely PRG arrival.
-    */
-
     if(
         closerCount>=1
         &&
@@ -1119,12 +1287,6 @@ function updateArrivalCandidate(ac){
             Date.now();
     }
 
-
-    /*
-       Once a candidate gets inside
-       8 km we keep it remembered
-       even if it later circles briefly.
-    */
 
     if(
         memory.arrivalCandidate
@@ -1140,17 +1302,6 @@ function updateArrivalCandidate(ac){
 
 /* =========================================================
    TOUCHDOWN
-
-   Strong rule:
-
-   remembered arrival
-   +
-   now GROUND near runway
-   =
-   LANDED
-
-   This tolerates the ADS-B gap
-   we saw during real touchdowns.
 ========================================================= */
 
 function detectTouchdown(aircraft){
@@ -1179,12 +1330,6 @@ function detectTouchdown(aircraft){
             continue;
 
 
-        /*
-           Don't trust ancient stale
-           positions, but allow some
-           delay after touchdown.
-        */
-
         if(
             positionAge(ac)>15
         )
@@ -1197,10 +1342,6 @@ function detectTouchdown(aircraft){
             continue;
 
 
-        /*
-           Genuine landing.
-        */
-
         return ac;
     }
 
@@ -1211,14 +1352,6 @@ function detectTouchdown(aircraft){
 
 /* =========================================================
    DEPARTURE ACCELERATION
-
-   We learned from the real takeoff:
-
-   ordinary taxi around 8–20 kt,
-   then sustained acceleration.
-
-   We do not require the whole roll,
-   because ADS-B sometimes drops out.
 ========================================================= */
 
 function departureAcceleration(ac){
@@ -1282,22 +1415,9 @@ function departureAcceleration(ac){
         ];
 
 
-    /*
-       High ground speed near runway
-       is already strong evidence.
-    */
-
     if(latest.speed>=40)
         return true;
 
-
-    /*
-       Look for a genuine increasing
-       speed trend.
-
-       Example:
-       15 -> 20 -> 28 -> 33...
-    */
 
     const first=
         freshGround[0];
@@ -1342,17 +1462,6 @@ function departureAcceleration(ac){
 
 /* =========================================================
    AIRBORNE DEPARTURE FALLBACK
-
-   Handles the cases where ADS-B skipped
-   the actual takeoff roll.
-
-   Recent ground near runway
-   +
-   now AIR close to PRG
-   +
-   strong climb
-   =
-   TAKE OFF
 ========================================================= */
 
 function airborneDeparture(ac){
@@ -1411,11 +1520,6 @@ function airborneDeparture(ac){
         );
 
 
-    /*
-       We only care about
-       initial departures.
-    */
-
     if(
         alt===null
         ||
@@ -1430,12 +1534,6 @@ function airborneDeparture(ac){
         return false;
 
 
-    /*
-       Best evidence:
-       same aircraft was recently
-       ground near runway.
-    */
-
     if(
         memory.wasNearRunwayGround
         &&
@@ -1447,17 +1545,8 @@ function airborneDeparture(ac){
         return true;
 
 
-    /*
-       Backup:
-       recent sample itself was ground.
-    */
-
-    const samples=
-        memory.samples;
-
-
     const recentGround=
-        samples
+        memory.samples
         .slice(-12)
         .some(
             s=>
@@ -1476,11 +1565,7 @@ function airborneDeparture(ac){
 
 
 /* =========================================================
-   ARRIVAL DISPLAY
-
-   Only show APPROACHING when
-   candidate is within 3 km
-   of a runway threshold.
+   APPROACHING DISPLAY
 ========================================================= */
 
 function displayArrivalCandidate(ac){
@@ -1516,12 +1601,6 @@ function displayArrivalCandidate(ac){
     if(nearest.distance>3)
         return null;
 
-
-    /*
-       Strong climb means this is
-       probably a go-around / departure,
-       so don't display APPROACHING.
-    */
 
     if(
         verticalRate(ac)>900
@@ -1562,12 +1641,6 @@ function cleanup(){
         of aircraftMemory
     ){
 
-        /*
-           Arrival candidate memory
-           lasts several minutes so an
-           aircraft may be vectored around.
-        */
-
         if(
             memory.arrivalCandidate
             &&
@@ -1580,11 +1653,6 @@ function cleanup(){
             memory.arrivalCandidate=false;
         }
 
-
-        /*
-           Delete completely dead
-           aircraft after 15 minutes.
-        */
 
         if(
             now-memory.lastSeen
@@ -1599,7 +1667,7 @@ function cleanup(){
 
 
 /* =========================================================
-   MAIN LOOP
+   MAIN
 ========================================================= */
 
 async function update(){
@@ -1652,10 +1720,7 @@ async function update(){
 
 
         /*
-           =====================================
-           FIRST:
-           update history for EVERY aircraft.
-           =====================================
+           UPDATE MEMORY
         */
 
         for(const ac of aircraft){
@@ -1668,8 +1733,7 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 1
-           TRUE TOUCHDOWN
+           1 — TOUCHDOWN
            =====================================
         */
 
@@ -1702,10 +1766,6 @@ async function update(){
                 false;
 
 
-            memory.departureCandidate=
-                false;
-
-
             if(
                 activeDeparture===id
             )
@@ -1732,8 +1792,7 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 2
-           FRESH TAKEOFF ACCELERATION
+           2 — TAKEOFF ROLL
            =====================================
         */
 
@@ -1800,8 +1859,8 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 3
-           ACTIVE DEPARTURE LOCK
+           3 — ACTIVE DEPARTURE
+           CUT OFF AT 3000 FT
            =====================================
         */
 
@@ -1821,11 +1880,6 @@ async function update(){
                 const alt=
                     altitude(ac);
 
-
-                /*
-                   Continue showing TAKE OFF
-                   while ground or initial climb.
-                */
 
                 if(onGround(ac)){
 
@@ -1865,10 +1919,6 @@ async function update(){
                 }
             }
 
-            /*
-               If temporarily absent from feed,
-               keep the lock for a short time.
-            */
 
             else{
 
@@ -1887,12 +1937,6 @@ async function update(){
                     90000
                 ){
 
-                    /*
-                       Do not replace it with
-                       a random distant arrival.
-                       Keep current display.
-                    */
-
                     return;
                 }
 
@@ -1904,8 +1948,7 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 4
-           AIRBORNE DEPARTURE FALLBACK
+           4 — AIRBORNE DEPARTURE FALLBACK
            =====================================
         */
 
@@ -1970,8 +2013,7 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 5
-           LANDED HOLD
+           5 — LANDED HOLD
            =====================================
         */
 
@@ -1998,10 +2040,7 @@ async function update(){
 
         /*
            =====================================
-           PRIORITY 6
-           APPROACHING
-
-           Only candidates within 3 km.
+           6 — APPROACHING
            =====================================
         */
 
@@ -2056,10 +2095,6 @@ async function update(){
     }
 }
 
-
-/* =========================================================
-   START
-========================================================= */
 
 update();
 
