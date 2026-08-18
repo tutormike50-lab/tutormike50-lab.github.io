@@ -7,91 +7,30 @@
 
 <style>
 html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    background:transparent;
-    overflow:hidden;
+    margin:0;padding:0;width:100%;height:100%;
+    background:transparent;overflow:hidden;
     font-family:Arial,Helvetica,sans-serif;
 }
-
 .ribbon{
-    position:absolute;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:105px;
-    background:rgb(0,55,110);
-    color:white;
-    display:flex;
-    align-items:center;
-    box-sizing:border-box;
+    position:absolute;bottom:0;left:0;width:100%;height:105px;
+    background:rgb(0,55,110);color:white;display:flex;
+    align-items:center;box-sizing:border-box;
 }
-
-.airport{
-    width:23%;
-    padding-left:25px;
-    box-sizing:border-box;
-    font-size:22px;
-    font-weight:bold;
-}
-
-.live{
-    color:#ff3333;
-    font-size:16px;
-    margin-bottom:5px;
-}
-
-.aircraft-info{
-    width:52%;
-    padding-left:25px;
-    border-left:2px solid rgba(255,255,255,.25);
-    box-sizing:border-box;
-}
-
-.airline{
-    font-size:25px;
-    font-weight:bold;
-}
-
-.details{
-    font-size:19px;
-    margin-top:6px;
-    opacity:.9;
-}
-
-.status{
-    font-size:16px;
-    margin-top:5px;
-    color:#8fd3ff;
-}
-
-.visual{
-    width:25%;
-    text-align:center;
-    box-sizing:border-box;
-    padding-right:20px;
-}
-
-.visual-main{
-    font-size:24px;
-    font-weight:bold;
-}
-
-.visual-sub{
-    font-size:14px;
-    margin-top:7px;
-    opacity:.85;
-}
+.airport{width:23%;padding-left:25px;box-sizing:border-box;font-size:22px;font-weight:bold}
+.live{color:#ff3333;font-size:16px;margin-bottom:5px}
+.aircraft-info{width:52%;padding-left:25px;border-left:2px solid rgba(255,255,255,.25);box-sizing:border-box}
+.airline{font-size:25px;font-weight:bold}
+.details{font-size:19px;margin-top:6px;opacity:.9}
+.status{font-size:16px;margin-top:5px;color:#8fd3ff}
+.visual{width:25%;padding-right:20px;text-align:center;box-sizing:border-box}
+.visual-main{font-size:24px;font-weight:bold}
+.visual-sub{font-size:14px;margin-top:7px;opacity:.85}
 </style>
-
 </head>
 
 <body>
 
 <div class="ribbon">
-
     <div class="airport">
         <div class="live">● LIVE</div>
         PRAGUE AIRPORT
@@ -108,9 +47,7 @@ html,body{
         <div class="visual-main"></div>
         <div class="visual-sub"></div>
     </div>
-
 </div>
-
 
 <script>
 
@@ -118,1685 +55,1364 @@ const API =
 "https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
 
 
-/* ===============================
-   AIRLINES
-================================ */
-
-const airlines = {
-    TVS:"SMARTWINGS",
-    RYR:"RYANAIR",
-    UAE:"EMIRATES",
-    PGT:"PEGASUS AIRLINES",
-    AUA:"AUSTRIAN AIRLINES",
-    DLH:"LUFTHANSA",
-    KLM:"KLM",
-    BAW:"BRITISH AIRWAYS",
-    EZY:"EASYJET",
-    WZZ:"WIZZ AIR",
-    QTR:"QATAR AIRWAYS",
-    THY:"TURKISH AIRLINES",
-    AFR:"AIR FRANCE",
-    SWR:"SWISS",
-    LOT:"LOT POLISH AIRLINES",
-    SAS:"SAS",
-    FIN:"FINNAIR",
-    IBE:"IBERIA",
-    TAP:"TAP AIR PORTUGAL",
-    ITY:"ITA AIRWAYS",
-    EIN:"AER LINGUS",
-    VLG:"VUELING",
-    EWG:"EUROWINGS",
-    AEE:"AEGEAN AIRLINES",
-    BTI:"AIRBALTIC",
-    BEL:"BRUSSELS AIRLINES",
-    TRA:"TRANSAVIA",
-    EXS:"JET2",
-    TUI:"TUI",
-    ETD:"ETIHAD AIRWAYS",
-    ELY:"EL AL",
-    MSR:"EGYPTAIR"
+const airlines={
+ TVS:"SMARTWINGS",RYR:"RYANAIR",UAE:"EMIRATES",
+ PGT:"PEGASUS AIRLINES",AUA:"AUSTRIAN AIRLINES",
+ DLH:"LUFTHANSA",KLM:"KLM",BAW:"BRITISH AIRWAYS",
+ EZY:"EASYJET",WZZ:"WIZZ AIR",QTR:"QATAR AIRWAYS",
+ THY:"TURKISH AIRLINES",AFR:"AIR FRANCE",
+ SWR:"SWISS",LOT:"LOT POLISH AIRLINES",
+ SAS:"SAS",FIN:"FINNAIR",IBE:"IBERIA",
+ TAP:"TAP AIR PORTUGAL",ITY:"ITA AIRWAYS",
+ EIN:"AER LINGUS",VLG:"VUELING",EWG:"EUROWINGS",
+ AEE:"AEGEAN AIRLINES",BTI:"AIRBALTIC",
+ BEL:"BRUSSELS AIRLINES",TRA:"TRANSAVIA",
+ EXS:"JET2",TUI:"TUI",ETD:"ETIHAD AIRWAYS",
+ ELY:"EL AL",MSR:"EGYPTAIR"
 };
 
 
-/* ===============================
-   PRAGUE RUNWAYS
+/* ==================================================
+   RUNWAYS
+================================================== */
 
-   Every direction has:
-   - landing/departure threshold
-   - far end of runway
-   - heading
-================================ */
+const runways=[
 
-const runways = [
+ {
+  name:"06",heading:60,
+  threshold:{lat:50.1018361,lon:14.2263000},
+  farEnd:{lat:50.1159500,lon:14.2733667}
+ },
 
-    {
-        name:"06",
-        heading:60,
+ {
+  name:"24",heading:240,
+  threshold:{lat:50.1159500,lon:14.2733667},
+  farEnd:{lat:50.1018361,lon:14.2263000}
+ },
 
-        threshold:{
-            lat:50.1018361,
-            lon:14.2263000
-        },
+ {
+  name:"12",heading:122,
+  threshold:{lat:50.1080111,lon:14.2453667},
+  farEnd:{lat:50.0904667,lon:14.2816722}
+ },
 
-        farEnd:{
-            lat:50.1159500,
-            lon:14.2733667
-        }
-    },
-
-    {
-        name:"24",
-        heading:240,
-
-        threshold:{
-            lat:50.1159500,
-            lon:14.2733667
-        },
-
-        farEnd:{
-            lat:50.1018361,
-            lon:14.2263000
-        }
-    },
-
-    {
-        name:"12",
-        heading:122,
-
-        threshold:{
-            lat:50.1080111,
-            lon:14.2453667
-        },
-
-        farEnd:{
-            lat:50.0904667,
-            lon:14.2816722
-        }
-    },
-
-    {
-        name:"30",
-        heading:302,
-
-        threshold:{
-            lat:50.0904667,
-            lon:14.2816722
-        },
-
-        farEnd:{
-            lat:50.1080111,
-            lon:14.2453667
-        }
-    }
+ {
+  name:"30",heading:302,
+  threshold:{lat:50.0904667,lon:14.2816722},
+  farEnd:{lat:50.1080111,lon:14.2453667}
+ }
 
 ];
 
 
-/* ===============================
+/* ==================================================
+   NEW FILTER
+
+   Helicopters and common small/private aircraft
+   are removed BEFORE runway logic sees them.
+================================================== */
+
+const helicopterTypes=new Set([
+ "A109","A119","A139","A149","A169","A189",
+ "AS32","AS50","AS55","AS65",
+ "B06","B105","B212","B222","B412","B429",
+ "EC20","EC25","EC30","EC35","EC45","EC55",
+ "H125","H130","H135","H145","H155","H160",
+ "R22","R44","R66",
+ "S55","S58","S61","S64","S76","S92"
+]);
+
+
+const smallAircraftPrefixes=[
+ "C15","C17","C18","C19","C20","C21",
+ "C22","C23","C24","C25",
+ "PA18","PA20","PA22","PA24","PA28","PA32",
+ "PA34","PA38","PA44",
+ "DA20","DA40","DA42",
+ "SR20","SR22",
+ "DR40",
+ "P28",
+ "M20",
+ "BE23","BE24","BE33","BE35","BE36",
+ "DV20"
+];
+
+
+function unwantedAircraft(ac){
+
+ const type=(ac.t||"")
+     .trim()
+     .toUpperCase();
+
+ const category=(ac.category||"")
+     .trim()
+     .toUpperCase();
+
+
+ /*
+    ADS-B category A7 commonly identifies
+    rotorcraft in these feeds.
+ */
+
+ if(category==="A7")
+     return true;
+
+
+ if(helicopterTypes.has(type))
+     return true;
+
+
+ for(const prefix of smallAircraftPrefixes){
+
+     if(type.startsWith(prefix))
+         return true;
+ }
+
+
+ return false;
+}
+
+
+/* ==================================================
    MEMORY
-================================ */
+================================================== */
 
-const history = new Map();
+const history=new Map();
 
-/*
-   Aircraft positively identified
-   as arrivals.
-*/
+const arrivalMemory=new Map();
 
-const arrivalMemory = new Map();
+const landedBlacklist=new Map();
 
-/*
-   Aircraft that have recently landed
-   are forbidden from becoming departures.
-*/
+let departureLock=null;
 
-const landedBlacklist = new Map();
-
-let departureLock = null;
-let landedDisplay = null;
+let landedDisplay=null;
 
 
-/* ===============================
-   BASIC HELPERS
-================================ */
+/* ==================================================
+   BASIC FUNCTIONS
+================================================== */
 
 function aircraftId(ac){
 
-    return (
-        ac.hex ||
-        ac.r ||
-        (ac.flight || "").trim() ||
-        null
-    );
+ return (
+     ac.hex ||
+     ac.r ||
+     (ac.flight||"").trim() ||
+     null
+ );
 }
 
 
 function onGround(ac){
 
-    return (
-        ac.alt_baro === "ground" ||
-        ac.alt_geom === "ground"
-    );
+ return (
+     ac.alt_baro==="ground" ||
+     ac.alt_geom==="ground"
+ );
 }
 
 
 function altitude(ac){
 
-    if(onGround(ac))
-        return 0;
+ if(onGround(ac))
+     return 0;
 
-    let value =
-        Number(ac.alt_baro);
+ let x=Number(ac.alt_baro);
 
-    if(!Number.isFinite(value))
-        value =
-            Number(ac.alt_geom);
+ if(!Number.isFinite(x))
+     x=Number(ac.alt_geom);
 
-    return Number.isFinite(value)
-        ? value
-        : null;
+ return Number.isFinite(x)
+     ? x
+     : null;
 }
 
 
 function speed(ac){
 
-    const value =
-        Number(ac.gs);
+ const x=Number(ac.gs);
 
-    return Number.isFinite(value)
-        ? value
-        : 0;
+ return Number.isFinite(x)
+     ? x
+     : 0;
 }
 
 
 function verticalRate(ac){
 
-    let value =
-        Number(ac.baro_rate);
+ let x=Number(ac.baro_rate);
 
-    if(!Number.isFinite(value))
-        value =
-            Number(ac.geom_rate);
+ if(!Number.isFinite(x))
+     x=Number(ac.geom_rate);
 
-    return Number.isFinite(value)
-        ? value
-        : 0;
+ return Number.isFinite(x)
+     ? x
+     : 0;
 }
 
 
 function headingDifference(a,b){
 
-    let d =
-        Math.abs(a-b);
+ let d=Math.abs(a-b);
 
-    if(d>180)
-        d=360-d;
+ if(d>180)
+     d=360-d;
 
-    return d;
+ return d;
 }
 
 
-function distanceKm(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-){
+function distanceKm(lat1,lon1,lat2,lon2){
 
-    const R=6371;
+ const R=6371;
 
-    const dLat =
-        (lat2-lat1) *
-        Math.PI/180;
+ const dLat=(lat2-lat1)*Math.PI/180;
+ const dLon=(lon2-lon1)*Math.PI/180;
 
-    const dLon =
-        (lon2-lon1) *
-        Math.PI/180;
+ const a=
+ Math.sin(dLat/2)**2+
+ Math.cos(lat1*Math.PI/180)*
+ Math.cos(lat2*Math.PI/180)*
+ Math.sin(dLon/2)**2;
 
-    const a =
-        Math.sin(dLat/2)**2 +
-
-        Math.cos(lat1*Math.PI/180) *
-        Math.cos(lat2*Math.PI/180) *
-
-        Math.sin(dLon/2)**2;
-
-    return R*2*
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1-a)
-        );
+ return R*2*
+ Math.atan2(
+     Math.sqrt(a),
+     Math.sqrt(1-a)
+ );
 }
 
 
-/* ===============================
-   AIRLINE DISPLAY
-================================ */
+/* ==================================================
+   DISPLAY
+================================================== */
 
 function airlineName(callsign){
 
-    if(!callsign)
-        return "";
+ if(!callsign)
+     return "";
 
-    const clean =
-        callsign
-        .trim()
-        .toUpperCase();
+ const clean=
+ callsign.trim().toUpperCase();
 
-    return (
-        airlines[
-            clean.substring(0,3)
-        ] || ""
-    );
+ return airlines[
+     clean.substring(0,3)
+ ] || "";
 }
 
 
 function headline(ac){
 
-    const callsign =
-        ac.flight &&
-        ac.flight.trim()
+ const callsign=
+ (ac.flight||"").trim() ||
+ "AIRCRAFT";
 
-        ? ac.flight.trim()
+ const company=
+ airlineName(callsign);
 
-        : "AIRCRAFT";
-
-    const company =
-        airlineName(callsign);
-
-    return company
-
-        ? company +
-          "  •  " +
-          callsign
-
-        : callsign;
+ return company
+ ? company+"  •  "+callsign
+ : callsign;
 }
 
 
 function aircraftDetails(ac){
 
-    return [
-        ac.t || "",
-        ac.r || ""
-    ]
-    .filter(Boolean)
-    .join("  •  ");
+ return [
+     ac.t||"",
+     ac.r||""
+ ]
+ .filter(Boolean)
+ .join("  •  ");
 }
 
 
-/* ===============================
-   SCREEN
-================================ */
+function show(ac,status,big="",small=""){
 
-function show(
-    ac,
-    status,
-    big="",
-    small=""
-){
+ document.querySelector(".airline")
+ .textContent=headline(ac);
 
-    document
-    .querySelector(".airline")
-    .textContent =
-        headline(ac);
+ document.querySelector(".details")
+ .textContent=aircraftDetails(ac);
 
-    document
-    .querySelector(".details")
-    .textContent =
-        aircraftDetails(ac);
+ document.querySelector(".status")
+ .textContent=status;
 
-    document
-    .querySelector(".status")
-    .textContent =
-        status;
+ document.querySelector(".visual-main")
+ .textContent=big;
 
-    document
-    .querySelector(".visual-main")
-    .textContent =
-        big;
-
-    document
-    .querySelector(".visual-sub")
-    .textContent =
-        small;
+ document.querySelector(".visual-sub")
+ .textContent=small;
 }
 
 
 function clear(){
 
-    document
-    .querySelector(".airline")
-    .textContent="";
-
-    document
-    .querySelector(".details")
-    .textContent="";
-
-    document
-    .querySelector(".status")
-    .textContent="";
-
-    document
-    .querySelector(".visual-main")
-    .textContent="";
-
-    document
-    .querySelector(".visual-sub")
-    .textContent="";
+ document.querySelector(".airline").textContent="";
+ document.querySelector(".details").textContent="";
+ document.querySelector(".status").textContent="";
+ document.querySelector(".visual-main").textContent="";
+ document.querySelector(".visual-sub").textContent="";
 }
 
 
-/* ===============================
-   RUNWAY GEOMETRY
+/* ==================================================
+   RUNWAY POSITION
 
-   Returns:
-   along = distance from threshold
-           in runway direction
+   along < 0  = before threshold
+   along > 0  = inside runway
 
-   cross = distance sideways
-           from runway centreline
+   cross = sideways distance from centreline
+================================================== */
 
-   along < 0 means BEFORE threshold.
+function runwayPosition(lat,lon,runway){
 
-   along > 0 means INSIDE runway.
-================================ */
+ const ref=
+ (lat+
+ runway.threshold.lat+
+ runway.farEnd.lat)/3;
 
-function runwayPosition(
-    lat,
-    lon,
-    runway
-){
+ const ky=111.32;
 
-    const refLat =
-        (
-            lat +
-            runway.threshold.lat +
-            runway.farEnd.lat
-        ) / 3;
-
-    const kmLat =
-        111.32;
-
-    const kmLon =
-        111.32 *
-        Math.cos(
-            refLat *
-            Math.PI/180
-        );
+ const kx=
+ 111.32*
+ Math.cos(ref*Math.PI/180);
 
 
-    const px =
-        lon*kmLon;
+ const px=lon*kx;
+ const py=lat*ky;
 
-    const py =
-        lat*kmLat;
+ const ax=runway.threshold.lon*kx;
+ const ay=runway.threshold.lat*ky;
 
-
-    const ax =
-        runway.threshold.lon *
-        kmLon;
-
-    const ay =
-        runway.threshold.lat *
-        kmLat;
+ const bx=runway.farEnd.lon*kx;
+ const by=runway.farEnd.lat*ky;
 
 
-    const bx =
-        runway.farEnd.lon *
-        kmLon;
+ const vx=bx-ax;
+ const vy=by-ay;
 
-    const by =
-        runway.farEnd.lat *
-        kmLat;
+ const length=
+ Math.sqrt(vx*vx+vy*vy);
 
+ const ux=vx/length;
+ const uy=vy/length;
 
-    const vx =
-        bx-ax;
+ const dx=px-ax;
+ const dy=py-ay;
 
-    const vy =
-        by-ay;
+ const along=
+ dx*ux+dy*uy;
 
+ const cross=
+ Math.abs(
+     dx*uy-dy*ux
+ );
 
-    const length =
-        Math.sqrt(
-            vx*vx +
-            vy*vy
-        );
-
-
-    const ux =
-        vx/length;
-
-    const uy =
-        vy/length;
-
-
-    const dx =
-        px-ax;
-
-    const dy =
-        py-ay;
-
-
-    const along =
-        dx*ux +
-        dy*uy;
-
-
-    const cross =
-        Math.abs(
-            dx*uy -
-            dy*ux
-        );
-
-
-    return {
-        along,
-        cross,
-        length
-    };
+ return {
+     along,
+     cross,
+     length
+ };
 }
 
 
-/* ===============================
-   BEST RUNWAY BY HEADING
-================================ */
+/* ==================================================
+   BEST RUNWAY
+================================================== */
 
 function bestRunway(track){
 
-    let best=null;
-    let difference=999;
+ let best=null;
+ let difference=999;
 
-    for(
-        const runway
-        of runways
-    ){
+ for(const runway of runways){
 
-        const d =
-            headingDifference(
-                track,
-                runway.heading
-            );
+     const d=
+     headingDifference(
+         track,
+         runway.heading
+     );
 
-        if(d<difference){
+     if(d<difference){
 
-            difference=d;
-            best=runway;
-        }
-    }
+         difference=d;
+         best=runway;
+     }
+ }
 
-    return {
-        runway:best,
-        difference
-    };
+ return {
+     runway:best,
+     difference
+ };
 }
 
 
-/* ===============================
-   ARRIVAL DETECTION
-================================ */
+/* ==================================================
+   ARRIVAL
+================================================== */
 
 function detectArrival(ac){
 
-    if(onGround(ac))
-        return null;
+ if(onGround(ac))
+     return null;
+
+ const ident=
+ aircraftId(ac);
+
+ if(!ident)
+     return null;
+
+ if(departureLock===ident)
+     return null;
 
 
-    const ident =
-        aircraftId(ac);
-
-    if(!ident)
-        return null;
+ const lat=Number(ac.lat);
+ const lon=Number(ac.lon);
+ const track=Number(ac.track);
 
 
-    if(
-        departureLock === ident
-    )
-        return null;
+ if(
+ !Number.isFinite(lat)||
+ !Number.isFinite(lon)||
+ !Number.isFinite(track)
+ )
+ return null;
 
 
-    const lat =
-        Number(ac.lat);
+ const alt=altitude(ac);
 
-    const lon =
-        Number(ac.lon);
+ if(alt!==null && alt>7000)
+     return null;
 
-    const track =
-        Number(ac.track);
-
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon) ||
-        !Number.isFinite(track)
-    )
-        return null;
+ if(verticalRate(ac)>600)
+     return null;
 
 
-    const alt =
-        altitude(ac);
+ const match=
+ bestRunway(track);
+
+ if(
+ !match.runway ||
+ match.difference>40
+ )
+ return null;
 
 
-    if(
-        alt!==null &&
-        alt>7000
-    )
-        return null;
+ const runway=
+ match.runway;
 
 
-    if(
-        verticalRate(ac)>600
-    )
-        return null;
+ const distance=
+ distanceKm(
+     lat,
+     lon,
+     runway.threshold.lat,
+     runway.threshold.lon
+ );
 
 
-    const match =
-        bestRunway(track);
+ if(distance>25)
+     return null;
 
 
-    if(
-        !match.runway ||
-        match.difference>40
-    )
-        return null;
+ if(distance<=8){
+
+     arrivalMemory.set(
+         ident,
+         {
+             runway,
+             lastSeen:Date.now()
+         }
+     );
+ }
 
 
-    const runway =
-        match.runway;
+ const old=
+ history.get(ident);
+
+ let approaching=false;
+
+ if(
+ old &&
+ Number.isFinite(
+     old.thresholdDistance
+ )
+ ){
+
+     approaching=
+     distance<
+     old.thresholdDistance;
+ }
 
 
-    const distance =
-        distanceKm(
-            lat,
-            lon,
-            runway.threshold.lat,
-            runway.threshold.lon
-        );
+ let score=
+ 1000-
+ distance*30-
+ match.difference*5;
 
 
-    if(distance>25)
-        return null;
+ if(approaching)
+     score+=600;
+
+ if(verticalRate(ac)<-150)
+     score+=300;
 
 
-    /*
-       Remember convincing arrival
-       once within 8 km.
-    */
-
-    if(distance<=8){
-
-        arrivalMemory.set(
-            ident,
-            {
-                runway,
-                lastSeen:Date.now()
-            }
-        );
-    }
-
-
-    const old =
-        history.get(ident);
-
-
-    let approaching=false;
-
-
-    if(
-        old &&
-        Number.isFinite(
-            old.thresholdDistance
-        )
-    ){
-
-        approaching =
-            distance <
-            old.thresholdDistance;
-    }
-
-
-    let score =
-        1000
-        -
-        distance*30
-        -
-        match.difference*5;
-
-
-    if(approaching)
-        score+=600;
-
-
-    if(verticalRate(ac)<-150)
-        score+=300;
-
-
-    return {
-        ac,
-        runway,
-        distance,
-        score
-    };
+ return {
+     ac,
+     runway,
+     distance,
+     score
+ };
 }
 
 
-/* ===============================
-   TRUE TOUCHDOWN
-
-   Important:
-
-   Aircraft must:
-   1. already be known as arrival
-   2. now report GROUND
-   3. physically be AFTER threshold
-   4. physically be INSIDE runway
-
-   If ground appears before threshold,
-   we DO NOT call it landed.
-================================ */
+/* ==================================================
+   TOUCHDOWN
+================================================== */
 
 function detectTouchdown(aircraft){
 
-    for(const ac of aircraft){
+ for(const ac of aircraft){
 
-        const ident =
-            aircraftId(ac);
+     const ident=
+     aircraftId(ac);
 
-
-        if(
-            !ident ||
-            !onGround(ac)
-        )
-            continue;
-
-
-        const memory =
-            arrivalMemory.get(ident);
+     if(
+     !ident ||
+     !onGround(ac)
+     )
+     continue;
 
 
-        if(!memory)
-            continue;
+     const memory=
+     arrivalMemory.get(ident);
+
+     if(!memory)
+         continue;
 
 
-        const runway =
-            memory.runway;
+     const runway=
+     memory.runway;
 
 
-        const position =
-            runwayPosition(
-                Number(ac.lat),
-                Number(ac.lon),
-                runway
-            );
+     const position=
+     runwayPosition(
+         Number(ac.lat),
+         Number(ac.lon),
+         runway
+     );
 
 
-        /*
-           Must be physically inside
-           runway after threshold.
+     if(
+     position.along>=0 &&
+     position.along<=
+         position.length+0.20 &&
+     position.cross<=0.12
+     ){
 
-           cross <= 120 metres
-           allows ADS-B error.
-        */
+         return {
+             ac,
+             runway
+         };
+     }
+ }
 
-        if(
-            position.along >= 0 &&
-            position.along <=
-                position.length + 0.20 &&
-            position.cross <= 0.12
-        ){
-
-            return {
-                ac,
-                runway,
-                position
-            };
-        }
-    }
-
-
-    return null;
+ return null;
 }
 
 
-/* ===============================
+/* ==================================================
    DEPARTURE AT THRESHOLD
-
-   This is the big departure change.
-
-   We don't look along the whole runway
-   anymore.
-
-   We specifically look around the
-   departure threshold zone.
-
-   That's the same physical point
-   used for landing in that direction.
-================================ */
+================================================== */
 
 function detectDepartureAtThreshold(ac){
 
-    const ident =
-        aircraftId(ac);
+ const ident=
+ aircraftId(ac);
+
+ if(
+ !ident ||
+ !onGround(ac)
+ )
+ return null;
 
 
-    if(
-        !ident ||
-        !onGround(ac)
-    )
-        return null;
+ if(landedBlacklist.has(ident))
+     return null;
 
 
-    /*
-       Recently landed aircraft
-       are completely forbidden.
-    */
-
-    if(
-        landedBlacklist.has(ident)
-    )
-        return null;
+ if(arrivalMemory.has(ident))
+     return null;
 
 
-    /*
-       Aircraft remembered as an
-       approaching arrival is also
-       forbidden.
-    */
-
-    if(
-        arrivalMemory.has(ident)
-    )
-        return null;
+ const lat=Number(ac.lat);
+ const lon=Number(ac.lon);
+ const track=Number(ac.track);
 
 
-    const lat =
-        Number(ac.lat);
-
-    const lon =
-        Number(ac.lon);
-
-    const track =
-        Number(ac.track);
+ if(
+ !Number.isFinite(lat)||
+ !Number.isFinite(lon)||
+ !Number.isFinite(track)
+ )
+ return null;
 
 
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon) ||
-        !Number.isFinite(track)
-    )
-        return null;
+ let best=null;
 
 
-    let best=null;
+ for(const runway of runways){
+
+     const position=
+     runwayPosition(
+         lat,
+         lon,
+         runway
+     );
 
 
-    for(
-        const runway
-        of runways
-    ){
+     /*
+        Aircraft can be just before
+        threshold or first 800 m of runway.
+     */
 
-        const position =
-            runwayPosition(
-                lat,
-                lon,
-                runway
-            );
-
-
-        /*
-           Departure threshold zone:
-
-           allow approximately
-           150 m before threshold
-           to 650 m into runway.
-        */
-
-        if(
-            position.along < -0.15 ||
-            position.along > 0.65
-        )
-            continue;
+     if(
+     position.along < -0.20 ||
+     position.along > 0.80
+     )
+     continue;
 
 
-        /*
-           Must be close to runway
-           centreline.
-        */
-
-        if(
-            position.cross > 0.11
-        )
-            continue;
+     if(position.cross>0.12)
+         continue;
 
 
-        const directionDifference =
-            headingDifference(
-                track,
-                runway.heading
-            );
+     const diff=
+     headingDifference(
+         track,
+         runway.heading
+     );
 
 
-        if(
-            directionDifference>18
-        )
-            continue;
+     if(diff>20)
+         continue;
 
 
-        let score =
-            10000
-
-            -
-            Math.abs(
-                position.along
-            )*500
-
-            -
-            position.cross*10000
-
-            -
-            directionDifference*50
-
-            +
-            Math.min(
-                speed(ac)*5,
-                800
-            );
+     let score=
+     10000-
+     Math.abs(position.along)*400-
+     position.cross*10000-
+     diff*40+
+     Math.min(speed(ac)*5,800);
 
 
-        if(
-            !best ||
-            score>best.score
-        ){
+     if(
+     !best ||
+     score>best.score
+     ){
 
-            best={
-                ac,
-                runway,
-                position,
-                score
-            };
-        }
-    }
+         best={
+             ac,
+             runway,
+             score
+         };
+     }
+ }
 
-
-    return best;
+ return best;
 }
 
 
-/* ===============================
-   AIRBORNE DEPARTURE BACKUP
-================================ */
+/* ==================================================
+   AIRBORNE DEPARTURE FALLBACK
+================================================== */
 
 function detectAirborneDeparture(ac){
 
-    if(onGround(ac))
-        return null;
+ if(onGround(ac))
+     return null;
+
+ const ident=
+ aircraftId(ac);
+
+ if(!ident)
+     return null;
+
+ if(
+ landedBlacklist.has(ident) ||
+ arrivalMemory.has(ident)
+ )
+ return null;
 
 
-    const ident =
-        aircraftId(ac);
+ const alt=
+ altitude(ac);
+
+ if(
+ alt===null ||
+ alt>=2500
+ )
+ return null;
 
 
-    if(!ident)
-        return null;
+ if(verticalRate(ac)<150)
+     return null;
 
 
-    if(
-        landedBlacklist.has(ident) ||
-        arrivalMemory.has(ident)
-    )
-        return null;
+ const old=
+ history.get(ident);
 
 
-    const alt =
-        altitude(ac);
+ let score=
+ 5000-alt;
 
 
-    if(
-        alt===null ||
-        alt>=2500
-    )
-        return null;
+ if(
+ old &&
+ old.ground
+ )
+ score+=20000;
 
 
-    if(
-        verticalRate(ac)<150
-    )
-        return null;
-
-
-    /*
-       Strong evidence if aircraft
-       was ground on previous update.
-    */
-
-    const old =
-        history.get(ident);
-
-
-    let score =
-        5000 -
-        alt;
-
-
-    if(
-        old &&
-        old.ground
-    )
-        score+=20000;
-
-
-    return {
-        ac,
-        score
-    };
+ return {
+     ac,
+     score
+ };
 }
 
 
-/* ===============================
+/* ==================================================
    SAVE HISTORY
-================================ */
+================================================== */
 
 function saveHistory(aircraft){
 
-    for(const ac of aircraft){
+ for(const ac of aircraft){
 
-        const ident =
-            aircraftId(ac);
+     const ident=
+     aircraftId(ac);
 
-
-        if(!ident)
-            continue;
-
-
-        let thresholdDistance =
-            999;
+     if(!ident)
+         continue;
 
 
-        const remembered =
-            arrivalMemory.get(ident);
+     let thresholdDistance=999;
 
 
-        if(
-            remembered &&
-            !onGround(ac)
-        ){
-
-            thresholdDistance =
-                distanceKm(
-                    Number(ac.lat),
-                    Number(ac.lon),
-                    remembered.runway.threshold.lat,
-                    remembered.runway.threshold.lon
-                );
-        }
+     const remembered=
+     arrivalMemory.get(ident);
 
 
-        history.set(
-            ident,
-            {
-                ground:
-                    onGround(ac),
+     if(
+     remembered &&
+     !onGround(ac)
+     ){
 
-                speed:
-                    speed(ac),
+         thresholdDistance=
+         distanceKm(
+             Number(ac.lat),
+             Number(ac.lon),
+             remembered.runway.threshold.lat,
+             remembered.runway.threshold.lon
+         );
+     }
 
-                altitude:
-                    altitude(ac),
 
-                thresholdDistance,
-
-                time:
-                    Date.now()
-            }
-        );
-    }
+     history.set(
+         ident,
+         {
+             ground:onGround(ac),
+             speed:speed(ac),
+             altitude:altitude(ac),
+             thresholdDistance,
+             time:Date.now()
+         }
+     );
+ }
 }
 
 
-/* ===============================
-   CLEAN OLD MEMORY
-================================ */
+/* ==================================================
+   CLEAN MEMORY
+================================================== */
 
 function cleanup(){
 
-    const now =
-        Date.now();
+ const now=
+ Date.now();
 
 
-    for(
-        const [ident,expiry]
-        of landedBlacklist
-    ){
+ for(
+ const [ident,expiry]
+ of landedBlacklist
+ ){
 
-        if(now>=expiry)
-            landedBlacklist.delete(
-                ident
-            );
-    }
+     if(now>=expiry)
+         landedBlacklist.delete(ident);
+ }
 
 
-    for(
-        const [ident,item]
-        of arrivalMemory
-    ){
+ for(
+ const [ident,item]
+ of arrivalMemory
+ ){
 
-        if(
-            now-item.lastSeen >
-            60000
-        ){
-
-            arrivalMemory.delete(
-                ident
-            );
-        }
-    }
+     if(
+     now-item.lastSeen>
+     60000
+     )
+     arrivalMemory.delete(ident);
+ }
 
 
-    for(
-        const [ident,item]
-        of history
-    ){
+ for(
+ const [ident,item]
+ of history
+ ){
 
-        if(
-            now-item.time >
-            10*60*1000
-        ){
-
-            history.delete(
-                ident
-            );
-        }
-    }
+     if(
+     now-item.time>
+     600000
+     )
+     history.delete(ident);
+ }
 }
 
 
-/* ===============================
+/* ==================================================
    MAIN ENGINE
-================================ */
+================================================== */
 
 async function update(){
 
-    cleanup();
+ cleanup();
 
 
-    try{
+ try{
 
-        const response =
-            await fetch(
-                API +
-                "?t=" +
-                Date.now(),
-                {
-                    cache:"no-store"
-                }
-            );
+     const response=
+     await fetch(
+         API+
+         "?t="+
+         Date.now(),
+         {
+             cache:"no-store"
+         }
+     );
 
 
-        if(!response.ok)
-            throw new Error(
-                "HTTP "+
-                response.status
-            );
+     if(!response.ok)
+         throw new Error(
+             "HTTP "+
+             response.status
+         );
 
 
-        const data =
-            await response.json();
+     const data=
+     await response.json();
 
 
-        const aircraft =
-            (data.ac || [])
-            .filter(
-                ac =>
-                Number.isFinite(
-                    Number(ac.lat)
-                )
-                &&
-                Number.isFinite(
-                    Number(ac.lon)
-                )
-            );
+     /*
+        THE IMPORTANT NEW LINE:
 
+        Filter unwanted aircraft BEFORE
+        they reach any runway logic.
+     */
 
-        /*
-           =================================
-           1. TRUE TOUCHDOWN
-           =================================
-        */
+     const aircraft=
+     (data.ac||[])
+     .filter(
+         ac =>
+         Number.isFinite(
+             Number(ac.lat)
+         )
+         &&
+         Number.isFinite(
+             Number(ac.lon)
+         )
+     )
+     .filter(
+         ac =>
+         !unwantedAircraft(ac)
+     );
 
-        const touchdown =
-            detectTouchdown(
-                aircraft
-            );
 
+     /*
+        ================================
+        PRIORITY 1
+        TRUE TOUCHDOWN
+        ================================
+     */
 
-        if(touchdown){
+     const touchdown=
+     detectTouchdown(aircraft);
 
-            const ident =
-                aircraftId(
-                    touchdown.ac
-                );
 
+     if(touchdown){
 
-            landedBlacklist.set(
-                ident,
-                Date.now() +
-                5*60*1000
-            );
+         const ident=
+         aircraftId(
+             touchdown.ac
+         );
 
 
-            arrivalMemory.delete(
-                ident
-            );
+         landedBlacklist.set(
+             ident,
+             Date.now()+
+             5*60*1000
+         );
 
 
-            if(
-                departureLock ===
-                ident
-            ){
+         arrivalMemory.delete(
+             ident
+         );
 
-                departureLock=null;
-            }
 
+         if(
+         departureLock===ident
+         )
+         departureLock=null;
 
-            landedDisplay={
-                ac:
-                    touchdown.ac,
 
-                runway:
-                    touchdown.runway,
+         landedDisplay={
+             ac:touchdown.ac,
+             runway:touchdown.runway,
+             until:
+                 Date.now()+10000
+         };
 
-                until:
-                    Date.now() +
-                    10000
-            };
 
+         show(
+             touchdown.ac,
 
-            show(
-                touchdown.ac,
+             "LANDED  •  RWY "+
+             touchdown.runway.name,
 
-                "LANDED  •  RWY "+
-                touchdown.runway.name,
+             "LANDED",
 
-                "LANDED",
+             "PRAGUE"
+         );
 
-                "PRAGUE"
-            );
 
+         saveHistory(aircraft);
 
-            saveHistory(
-                aircraft
-            );
+         return;
+     }
 
-            return;
-        }
 
+     /*
+        ================================
+        PRIORITY 2
+        DEPARTURE AT THRESHOLD
 
-        /*
-           =================================
-           2. DEPARTURE AT THRESHOLD
+        This beats every arrival.
+        ================================
+     */
 
-           HIGHEST MOVEMENT PRIORITY.
-           =================================
-        */
+     let departureCandidate=null;
 
-        let departureCandidate=null;
 
+     for(const ac of aircraft){
 
-        for(
-            const ac
-            of aircraft
-        ){
+         const candidate=
+         detectDepartureAtThreshold(
+             ac
+         );
 
-            const candidate =
-                detectDepartureAtThreshold(
-                    ac
-                );
 
+         if(!candidate)
+             continue;
 
-            if(!candidate)
-                continue;
 
+         if(
+         !departureCandidate ||
+         candidate.score>
+         departureCandidate.score
+         ){
 
-            if(
-                !departureCandidate ||
-                candidate.score >
-                departureCandidate.score
-            ){
+             departureCandidate=
+             candidate;
+         }
+     }
 
-                departureCandidate =
-                    candidate;
-            }
-        }
 
+     if(departureCandidate){
 
-        if(
-            departureCandidate
-        ){
+         const ac=
+         departureCandidate.ac;
 
-            const ac =
-                departureCandidate.ac;
+         const ident=
+         aircraftId(ac);
 
+         departureLock=
+         ident;
 
-            const ident =
-                aircraftId(ac);
 
+         const gs=
+         speed(ac);
 
-            departureLock =
-                ident;
 
+         const old=
+         history.get(ident);
 
-            const gs =
-                speed(ac);
 
+         const accelerating=
+         old &&
+         gs>
+         old.speed+3;
 
-            const old =
-                history.get(ident);
 
+         if(
+         gs<40 &&
+         !accelerating
+         ){
 
-            const accelerating =
-                old &&
-                gs >
-                old.speed + 3;
+             show(
+                 ac,
 
+                 "LINED UP  •  RWY "+
+                 departureCandidate.runway.name+
+                 "  •  READY FOR DEPARTURE",
 
-            /*
-               Lined up first.
-            */
+                 "LINED UP",
 
-            if(
-                gs < 40 &&
-                !accelerating
-            ){
+                 "RWY "+
+                 departureCandidate.runway.name
+             );
+         }
 
-                show(
-                    ac,
+         else{
 
-                    "LINED UP  •  RWY "+
-                    departureCandidate.runway.name+
-                    "  •  READY FOR DEPARTURE",
+             show(
+                 ac,
 
-                    "LINED UP",
+                 "TAKEOFF ROLL  •  RWY "+
+                 departureCandidate.runway.name+
+                 "  •  "+
+                 Math.round(gs)+
+                 " KT",
 
-                    "RWY "+
-                    departureCandidate.runway.name
-                );
-            }
+                 "TAKEOFF",
 
-            else{
+                 "RWY "+
+                 departureCandidate.runway.name
+             );
+         }
 
-                show(
-                    ac,
 
-                    "TAKEOFF ROLL  •  RWY "+
-                    departureCandidate.runway.name+
-                    "  •  "+
-                    Math.round(gs)+
-                    " KT",
+         saveHistory(aircraft);
 
-                    "TAKEOFF",
+         return;
+     }
 
-                    "RWY "+
-                    departureCandidate.runway.name
-                );
-            }
 
+     /*
+        ================================
+        PRIORITY 3
+        LOCKED DEPARTURE
+        ================================
+     */
 
-            saveHistory(
-                aircraft
-            );
+     if(departureLock){
 
-            return;
-        }
+         const ac=
+         aircraft.find(
+             item =>
+             aircraftId(item)===
+             departureLock
+         );
 
 
-        /*
-           =================================
-           3. ACTIVE DEPARTURE
-           =================================
-        */
+         if(ac){
 
-        if(departureLock){
+             const alt=
+             altitude(ac);
 
-            const ac =
-                aircraft.find(
-                    item =>
-                    aircraftId(item) ===
-                    departureLock
-                );
 
+             if(
+             !onGround(ac) &&
+             alt!==null &&
+             alt<3000
+             ){
 
-            if(ac){
+                 const text=
+                 alt<1000
+                 ? "DEPARTED"
+                 : "CLIMBING";
 
-                const alt =
-                    altitude(ac);
 
+                 show(
+                     ac,
 
-                if(
-                    !onGround(ac) &&
-                    alt!==null &&
-                    alt<3000
-                ){
+                     text+
+                     "  •  "+
+                     Math.round(alt)
+                     .toLocaleString()+
+                     " FT",
 
-                    show(
-                        ac,
+                     text,
 
-                        (
-                            alt<1000
-                            ? "DEPARTED"
-                            : "CLIMBING"
-                        ) +
+                     Math.round(
+                         speed(ac)
+                     )+
+                     " KT"
+                 );
 
-                        "  •  " +
 
-                        Math.round(alt)
-                        .toLocaleString() +
+                 saveHistory(aircraft);
 
-                        " FT",
+                 return;
+             }
 
-                        alt<1000
-                        ? "DEPARTED"
-                        : "CLIMBING",
 
-                        Math.round(
-                            speed(ac)
-                        )+
-                        " KT"
-                    );
+             if(
+             alt!==null &&
+             alt>=3000
+             )
+             departureLock=null;
 
+         }
 
-                    saveHistory(
-                        aircraft
-                    );
+         else{
 
-                    return;
-                }
+             departureLock=null;
+         }
+     }
 
 
-                if(
-                    alt!==null &&
-                    alt>=3000
-                ){
+     /*
+        ================================
+        LANDED HOLD
+        ================================
+     */
 
-                    departureLock=null;
-                }
-            }
+     if(landedDisplay){
 
-            else{
+         if(
+         Date.now()<
+         landedDisplay.until
+         ){
 
-                departureLock=null;
-            }
-        }
+             show(
+                 landedDisplay.ac,
 
+                 "LANDED  •  RWY "+
+                 landedDisplay.runway.name,
 
-        /*
-           =================================
-           4. LANDED MESSAGE HOLD
+                 "LANDED",
 
-           Departure above is allowed
-           to interrupt this if necessary.
-           =================================
-        */
+                 "PRAGUE"
+             );
 
-        if(landedDisplay){
 
-            if(
-                Date.now() <
-                landedDisplay.until
-            ){
+             saveHistory(aircraft);
 
-                show(
-                    landedDisplay.ac,
+             return;
+         }
 
-                    "LANDED  •  RWY "+
-                    landedDisplay.runway.name,
+         else{
 
-                    "LANDED",
+             landedDisplay=null;
+         }
+     }
 
-                    "PRAGUE"
-                );
 
+     /*
+        ================================
+        BUILD ARRIVALS
+        ================================
+     */
 
-                saveHistory(
-                    aircraft
-                );
+     const arrivals=[];
 
-                return;
-            }
 
-            else{
+     for(const ac of aircraft){
 
-                landedDisplay=null;
-            }
-        }
+         const candidate=
+         detectArrival(ac);
 
+         if(candidate)
+             arrivals.push(
+                 candidate
+             );
+     }
 
-        /*
-           =================================
-           BUILD ARRIVALS
-           =================================
-        */
 
-        const arrivals=[];
+     arrivals.sort(
+         (a,b)=>
+         b.score-a.score
+     );
 
 
-        for(
-            const ac
-            of aircraft
-        ){
+     /*
+        ================================
+        SHORT FINAL
+        ================================
+     */
 
-            const candidate =
-                detectArrival(ac);
+     const shortFinal=
+     arrivals.find(
+         item =>
+         item.distance<=3
+     );
 
 
-            if(candidate)
-                arrivals.push(
-                    candidate
-                );
-        }
+     if(shortFinal){
 
+         show(
+             shortFinal.ac,
 
-        arrivals.sort(
-            (a,b)=>
-            b.score-a.score
-        );
+             "ON FINAL  •  RWY "+
+             shortFinal.runway.name+
+             "  •  "+
+             shortFinal.distance
+             .toFixed(1)+
+             " KM",
 
+             "LANDING",
 
-        /*
-           =================================
-           5. SHORT FINAL
-           =================================
-        */
+             "RWY "+
+             shortFinal.runway.name
+         );
 
-        const shortFinal =
-            arrivals.find(
-                item =>
-                item.distance<=3
-            );
 
+         saveHistory(aircraft);
 
-        if(shortFinal){
+         return;
+     }
 
-            show(
-                shortFinal.ac,
 
-                "ON FINAL  •  RWY "+
-                shortFinal.runway.name+
-                "  •  "+
-                shortFinal.distance
-                .toFixed(1)+
-                " KM",
+     /*
+        ================================
+        AIRBORNE DEPARTURE BACKUP
+        ================================
+     */
 
-                "LANDING",
+     let airborneDeparture=null;
 
-                "RWY "+
-                shortFinal.runway.name
-            );
 
+     for(const ac of aircraft){
 
-            saveHistory(
-                aircraft
-            );
+         const candidate=
+         detectAirborneDeparture(
+             ac
+         );
 
-            return;
-        }
 
+         if(!candidate)
+             continue;
 
-        /*
-           =================================
-           6. NEW AIRBORNE DEPARTURE
-              FALLBACK
-           =================================
-        */
 
-        let airborneDeparture=null;
+         if(
+         !airborneDeparture ||
+         candidate.score>
+         airborneDeparture.score
+         ){
 
+             airborneDeparture=
+             candidate;
+         }
+     }
 
-        for(
-            const ac
-            of aircraft
-        ){
 
-            const candidate =
-                detectAirborneDeparture(
-                    ac
-                );
+     if(airborneDeparture){
 
+         const ac=
+         airborneDeparture.ac;
 
-            if(!candidate)
-                continue;
+         departureLock=
+         aircraftId(ac);
 
+         const alt=
+         altitude(ac);
 
-            if(
-                !airborneDeparture ||
-                candidate.score >
-                airborneDeparture.score
-            ){
 
-                airborneDeparture =
-                    candidate;
-            }
-        }
+         show(
+             ac,
 
+             (
+                 alt<1000
+                 ? "DEPARTED"
+                 : "CLIMBING"
+             )+
+             "  •  "+
+             Math.round(alt)
+             .toLocaleString()+
+             " FT",
 
-        if(airborneDeparture){
+             "DEPARTURE",
 
-            const ac =
-                airborneDeparture.ac;
+             Math.round(
+                 speed(ac)
+             )+
+             " KT"
+         );
 
 
-            departureLock =
-                aircraftId(ac);
+         saveHistory(aircraft);
 
+         return;
+     }
 
-            const alt =
-                altitude(ac);
 
+     /*
+        ================================
+        NORMAL ARRIVAL
+        ================================
+     */
 
-            show(
-                ac,
+     if(arrivals.length){
 
-                (
-                    alt<1000
-                    ? "DEPARTED"
-                    : "CLIMBING"
-                ) +
+         const chosen=
+         arrivals[0];
 
-                "  •  " +
 
-                Math.round(alt)
-                .toLocaleString() +
+         const text=
+         chosen.distance<=8
+         ? "APPROACHING"
+         : "INBOUND";
 
-                " FT",
 
-                "DEPARTURE",
+         show(
+             chosen.ac,
 
-                Math.round(
-                    speed(ac)
-                )+
-                " KT"
-            );
+             text+
+             "  •  RWY "+
+             chosen.runway.name+
+             "  •  "+
+             chosen.distance
+             .toFixed(1)+
+             " KM",
 
+             text,
 
-            saveHistory(
-                aircraft
-            );
+             "RWY "+
+             chosen.runway.name
+         );
 
-            return;
-        }
 
+         saveHistory(aircraft);
 
-        /*
-           =================================
-           7. NORMAL ARRIVAL
-           =================================
-        */
+         return;
+     }
 
-        if(arrivals.length){
 
-            const chosen =
-                arrivals[0];
+     clear();
 
+     saveHistory(aircraft);
 
-            const text =
-                chosen.distance<=8
-                ? "APPROACHING"
-                : "INBOUND";
+ }
 
+ catch(error){
 
-            show(
-                chosen.ac,
+     console.error(error);
 
-                text+
-                "  •  RWY "+
-                chosen.runway.name+
-                "  •  "+
-                chosen.distance
-                .toFixed(1)+
-                " KM",
-
-                text,
-
-                "RWY "+
-                chosen.runway.name
-            );
-
-
-            saveHistory(
-                aircraft
-            );
-
-            return;
-        }
-
-
-        /*
-           NOTHING
-        */
-
-        clear();
-
-
-        saveHistory(
-            aircraft
-        );
-
-    }
-
-    catch(error){
-
-        console.error(
-            error
-        );
-
-        clear();
-    }
+     clear();
+ }
 }
 
-
-/* ===============================
-   START
-================================ */
 
 update();
 
