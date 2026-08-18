@@ -4,24 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>PRG Aircraft Photo Test</title>
+<title>PRG ADS-B Test</title>
 
 <style>
+
 body{
     margin:0;
-    padding:25px;
+    padding:24px;
     background:#07111f;
     color:white;
     font-family:Arial,Helvetica,sans-serif;
 }
 
 h1{
-    margin-bottom:5px;
+    margin:0 0 6px;
 }
 
 .subtitle{
     color:#9bc7e8;
-    margin-bottom:25px;
+    margin-bottom:22px;
 }
 
 .panel{
@@ -29,38 +30,53 @@ h1{
     border:1px solid #28506f;
     border-radius:10px;
     padding:18px;
-    margin-bottom:20px;
+    margin-bottom:18px;
 }
 
-.aircraft{
-    padding:12px;
+button{
+    background:#1479c9;
+    color:white;
+    border:0;
+    border-radius:6px;
+    padding:10px 16px;
+    font-size:15px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1995ef;
+}
+
+.aircraft-row{
+    padding:11px;
     margin:6px 0;
     background:#142b42;
     border-radius:7px;
     cursor:pointer;
 }
 
-.aircraft:hover{
+.aircraft-row:hover{
     background:#1d4263;
 }
 
 #photo{
-    max-width:420px;
-    max-height:260px;
-    border-radius:8px;
     display:none;
+    max-width:430px;
+    max-height:280px;
     margin-top:15px;
+    border-radius:9px;
 }
 
 #photoStatus{
     margin-top:12px;
     color:#9bc7e8;
+    font-weight:bold;
 }
 
 #credit{
     margin-top:8px;
+    color:#c3ccd4;
     font-size:13px;
-    color:#aaa;
 }
 
 #raw{
@@ -72,27 +88,52 @@ h1{
     border-radius:7px;
     font-family:Consolas,monospace;
     font-size:13px;
-    max-height:350px;
-    overflow:auto;
+    line-height:1.5;
 }
+
+.good{
+    color:#73e58e;
+}
+
+.bad{
+    color:#ff7373;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>PRG AIRCRAFT PHOTO TEST</h1>
+<h1>PRG ADS-B TEST</h1>
 
 <div class="subtitle">
-Click an aircraft. We will try to find a photograph of that exact aircraft.
+Aircraft feed + exact aircraft photo test
 </div>
 
 
 <div class="panel">
 
-<h2>Aircraft near PRG</h2>
+<h2>1 — Connection test</h2>
+
+<p>
+This uses an aircraft photo we already know exists.
+</p>
+
+<button onclick="testKnownPhoto()">
+TEST KNOWN PHOTO
+</button>
+
+<div id="testResult"></div>
+
+</div>
+
+
+<div class="panel">
+
+<h2>2 — Aircraft near PRG</h2>
 
 <div id="aircraftList">
-Waiting for ADS-B...
+Loading aircraft...
 </div>
 
 </div>
@@ -105,13 +146,14 @@ No aircraft selected
 </h2>
 
 <div id="photoStatus">
-Select an aircraft above.
+Click an aircraft above.
 </div>
 
-<a id="photoLink"
-   href="#"
-   target="_blank"
-   rel="noopener">
+<a
+    id="photoLink"
+    target="_blank"
+    rel="noopener"
+>
 
 <img id="photo">
 
@@ -124,7 +166,7 @@ Select an aircraft above.
 
 <div class="panel">
 
-<h2>Photo API response</h2>
+<h2>API response / error</h2>
 
 <pre id="raw">
 Nothing requested yet.
@@ -135,8 +177,19 @@ Nothing requested yet.
 
 <script>
 
+/* ========================================
+   PERMANENT VERCEL ADDRESS
+======================================== */
+
+const BASE_API =
+"https://mikeaircraft-9hkn.vercel.app";
+
 const AIRCRAFT_API =
-"https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
+BASE_API + "/api/aircraft";
+
+const PHOTO_API =
+BASE_API + "/api/photo";
+
 
 const PRG={
     lat:50.1008,
@@ -144,15 +197,21 @@ const PRG={
 };
 
 
+/* ========================================
+   DISTANCE
+======================================== */
+
 function distanceKm(lat1,lon1,lat2,lon2){
 
     const R=6371;
 
     const dLat=
-        (lat2-lat1)*Math.PI/180;
+        (lat2-lat1)*
+        Math.PI/180;
 
     const dLon=
-        (lon2-lon1)*Math.PI/180;
+        (lon2-lon1)*
+        Math.PI/180;
 
     const a=
         Math.sin(dLat/2)**2
@@ -171,39 +230,242 @@ function distanceKm(lat1,lon1,lat2,lon2){
 }
 
 
-async function getPhoto(ac){
+/* ========================================
+   KNOWN-GOOD PHOTO TEST
+======================================== */
 
-    const status=
-        document.getElementById("photoStatus");
+async function testKnownPhoto(){
 
-    const photo=
-        document.getElementById("photo");
-
-    const credit=
-        document.getElementById("credit");
+    const result=
+        document.getElementById(
+            "testResult"
+        );
 
     const raw=
-        document.getElementById("raw");
+        document.getElementById(
+            "raw"
+        );
+
+    result.innerHTML=
+        "<p>Testing...</p>";
+
+
+    try{
+
+        const url=
+            PHOTO_API+
+            "?hex=400A0B";
+
+
+        const response=
+            await fetch(
+                url,
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        const text=
+            await response.text();
+
+
+        raw.textContent=
+            "HTTP STATUS: "+
+            response.status+
+            "\n\n"+
+            text;
+
+
+        if(!response.ok){
+
+            result.innerHTML=
+                '<p class="bad">FAILED — HTTP '+
+                response.status+
+                '</p>';
+
+            return;
+        }
+
+
+        const data=
+            JSON.parse(text);
+
+
+        if(
+            data.status===200
+            &&
+            data.data
+            &&
+            data.data.length
+        ){
+
+            result.innerHTML=
+                '<p class="good">SUCCESS — photo API is working.</p>';
+
+            showPhotoResult(
+                data,
+                "KNOWN TEST AIRCRAFT"
+            );
+        }
+
+        else{
+
+            result.innerHTML=
+                '<p class="bad">Connection worked, but photo data was not returned.</p>';
+        }
+
+    }
+
+    catch(error){
+
+        result.innerHTML=
+            '<p class="bad">FAILED TO FETCH</p>';
+
+
+        raw.textContent=
+
+            "ERROR NAME: "+
+            error.name+
+
+            "\nERROR MESSAGE: "+
+            error.message+
+
+            "\nPHOTO API: "+
+            PHOTO_API;
+    }
+}
+
+
+/* ========================================
+   SHOW PHOTO
+======================================== */
+
+function showPhotoResult(data,label){
+
+    const photo=
+        document.getElementById(
+            "photo"
+        );
+
+    const status=
+        document.getElementById(
+            "photoStatus"
+        );
+
+    const credit=
+        document.getElementById(
+            "credit"
+        );
 
     const link=
-        document.getElementById("photoLink");
+        document.getElementById(
+            "photoLink"
+        );
 
 
     photo.style.display="none";
+    photo.removeAttribute("src");
+
     credit.textContent="";
     link.removeAttribute("href");
+
+
+    if(
+        !data
+        ||
+        data.status!==200
+        ||
+        !data.data
+        ||
+        !data.data.length
+    ){
+
+        status.textContent=
+            "No photo available for "+
+            label;
+
+        return;
+    }
+
+
+    const item=
+        data.data[0];
+
+
+    if(!item.image){
+
+        status.textContent=
+            "Photo record exists but no image was returned.";
+
+        return;
+    }
+
+
+    photo.src=
+        item.image;
+
+    photo.style.display=
+        "block";
+
+
+    status.textContent=
+        "PHOTO FOUND — "+
+        label;
+
+
+    credit.textContent=
+
+        item.photographer
+
+        ?
+
+        "Photo: "+
+        item.photographer+
+        " / Airport-Data.com"
+
+        :
+
+        "Photo: Airport-Data.com";
+
+
+    if(item.link)
+        link.href=
+            item.link;
+}
+
+
+/* ========================================
+   LOOK UP REAL AIRCRAFT PHOTO
+======================================== */
+
+async function lookupPhoto(ac){
+
+    const raw=
+        document.getElementById(
+            "raw"
+        );
+
+    const status=
+        document.getElementById(
+            "photoStatus"
+        );
 
 
     const hex=
         (ac.hex||"")
         .trim()
-        .toLowerCase();
+        .toUpperCase();
+
+
+    const reg=
+        (ac.r||hex);
 
 
     if(!hex){
 
         status.textContent=
-            "This aircraft has no ICAO hex code.";
+            "No hex code available.";
 
         return;
     }
@@ -211,179 +473,98 @@ async function getPhoto(ac){
 
     status.textContent=
         "Looking for photo of "+
-        (ac.r||hex)+
+        reg+
         "...";
-
-
-    /*
-       Planespotters public photo lookup
-       via the adsb.lol compatibility proxy.
-
-       This avoids browser CORS problems
-       while testing.
-    */
-
-    const url=
-        "https://api.adsb.lol/v2/planespotters_net/hex/"
-        +
-        encodeURIComponent(hex);
 
 
     try{
 
+        const url=
+            PHOTO_API+
+            "?hex="+
+            encodeURIComponent(hex);
+
+
         const response=
-            await fetch(url);
-
-
-        if(!response.ok)
-            throw new Error(
-                "HTTP "+response.status
+            await fetch(
+                url,
+                {
+                    cache:"no-store"
+                }
             );
 
 
-        const data=
-            await response.json();
+        const text=
+            await response.text();
 
 
         raw.textContent=
-            JSON.stringify(
-                data,
-                null,
-                2
-            );
+
+            "REQUEST:\n"+
+            url+
+
+            "\n\nHTTP STATUS: "+
+            response.status+
+
+            "\n\nRESPONSE:\n"+
+            text;
 
 
-        if(
-            !data.photos ||
-            !data.photos.length
-        ){
+        if(!response.ok){
 
             status.textContent=
-                "No photo found for "+
-                (ac.r||hex);
+                "No photo available for "+
+                reg;
 
             return;
         }
 
 
-        const result=
-            data.photos[0];
+        const data=
+            JSON.parse(text);
 
 
-        /*
-           Different versions of the
-           service may return slightly
-           different thumbnail structures,
-           so we check the common forms.
-        */
-
-        const imageUrl=
-
-            result.thumbnail_large?.src
-
-            ||
-
-            result.thumbnail?.src
-
-            ||
-
-            result.thumbnail_large
-
-            ||
-
-            result.thumbnail
-
-            ||
-
-            null;
-
-
-        if(!imageUrl){
-
-            status.textContent=
-                "Photo record found, but no thumbnail URL.";
-
-            return;
-        }
-
-
-        photo.src=imageUrl;
-
-        photo.style.display="block";
-
-
-        status.textContent=
-            "PHOTO FOUND — "+
-            (ac.r||hex);
-
-
-        const photographer=
-
-            result.photographer
-
-            ||
-
-            result.photographer_name
-
-            ||
-
-            "";
-
-
-        credit.textContent=
-
-            photographer
-
-            ?
-
-            "Photo: "+
-            photographer+
-            " / Planespotters.net"
-
-            :
-
-            "Photo: Planespotters.net";
-
-
-        const original=
-
-            result.link
-
-            ||
-
-            result.url
-
-            ||
-
-            result.photo_url
-
-            ||
-
-            null;
-
-
-        if(original)
-            link.href=original;
+        showPhotoResult(
+            data,
+            reg
+        );
 
     }
 
     catch(error){
 
-        console.error(error);
-
-
         status.textContent=
-            "Photo lookup failed: "+
-            error.message;
+            "FAILED TO FETCH";
 
 
         raw.textContent=
-            String(error);
+
+            "ERROR NAME: "+
+            error.name+
+
+            "\nERROR MESSAGE: "+
+            error.message+
+
+            "\nPHOTO API: "+
+            PHOTO_API+
+
+            "\nAIRCRAFT HEX: "+
+            hex;
     }
 }
 
 
-async function updateAircraft(){
+/* ========================================
+   LOAD AIRCRAFT
+======================================== */
+
+async function loadAircraft(){
+
+    const list=
+        document.getElementById(
+            "aircraftList"
+        );
+
 
     try{
 
@@ -392,8 +573,19 @@ async function updateAircraft(){
                 AIRCRAFT_API+
                 "?t="+
                 Date.now(),
-                {cache:"no-store"}
+                {
+                    cache:"no-store"
+                }
             );
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "Aircraft API HTTP "+
+                response.status
+            );
+        }
 
 
         const data=
@@ -402,7 +594,6 @@ async function updateAircraft(){
 
         const aircraft=
             (data.ac||[])
-
             .filter(ac=>
 
                 Number.isFinite(
@@ -428,6 +619,7 @@ async function updateAircraft(){
                     PRG.lon
                 );
 
+
             const db=
                 distanceKm(
                     Number(b.lat),
@@ -436,20 +628,18 @@ async function updateAircraft(){
                     PRG.lon
                 );
 
+
             return da-db;
         });
-
-
-        const list=
-            document.getElementById(
-                "aircraftList"
-            );
 
 
         list.innerHTML="";
 
 
-        aircraft.forEach(ac=>{
+        let count=0;
+
+
+        for(const ac of aircraft){
 
             const d=
                 distanceKm(
@@ -461,14 +651,40 @@ async function updateAircraft(){
 
 
             if(d>25)
-                return;
+                continue;
 
 
-            const row=
-                document.createElement("div");
+            const type=
+                (ac.t||"")
+                .trim()
+                .toUpperCase();
 
 
-            row.className="aircraft";
+            const reg=
+                (ac.r||"")
+                .trim()
+                .toUpperCase();
+
+
+            /*
+               Remove obvious airport
+               towers / vehicles.
+            */
+
+            if(
+                type==="TWR"
+                ||
+                type==="GND"
+                ||
+                type==="EMER"
+                ||
+                reg==="TWR"
+                ||
+                reg==="GND"
+                ||
+                reg==="EMER"
+            )
+                continue;
 
 
             const callsign=
@@ -478,13 +694,23 @@ async function updateAircraft(){
                 "NO CALLSIGN";
 
 
+            const row=
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className=
+                "aircraft-row";
+
+
             row.textContent=
 
                 callsign+
                 "  |  "+
                 (ac.r||"NO REG")+
                 "  |  "+
-                (ac.desc||ac.t||"")+
+                (ac.desc||ac.t||"UNKNOWN TYPE")+
                 "  |  "+
                 d.toFixed(1)+
                 " km";
@@ -493,7 +719,9 @@ async function updateAircraft(){
             row.onclick=()=>{
 
                 document
-                .getElementById("selected")
+                .getElementById(
+                    "selected"
+                )
                 .textContent=
 
                     callsign+
@@ -503,31 +731,46 @@ async function updateAircraft(){
                     (ac.desc||ac.t||"");
 
 
-                getPhoto(ac);
+                lookupPhoto(ac);
             };
 
 
-            list.appendChild(row);
+            list.appendChild(
+                row
+            );
 
-        });
+
+            count++;
+        }
+
+
+        if(count===0){
+
+            list.textContent=
+                "No commercial aircraft currently nearby.";
+        }
 
     }
 
     catch(error){
 
-        document
-        .getElementById("aircraftList")
-        .textContent=
-            "ADS-B error: "+
-            error.message;
+        list.innerHTML=
+            '<span class="bad">'+
+            "AIRCRAFT FEED ERROR: "+
+            error.message+
+            "</span>";
     }
 }
 
 
-updateAircraft();
+/* ========================================
+   START
+======================================== */
+
+loadAircraft();
 
 setInterval(
-    updateAircraft,
+    loadAircraft,
     10000
 );
 
