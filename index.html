@@ -243,6 +243,13 @@ function scoreAircraft(ac) {
     const altitude =
         numericAltitude(ac);
 
+    if (
+    altitude !== null &&
+    altitude > 7000
+) {
+    return -9999;
+}
+
     const verticalRate =
         Number(ac.baro_rate);
 
