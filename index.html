@@ -89,51 +89,36 @@ const airportLat = 50.1008;
 const airportLon = 14.2600;
 
 const previousDistances = new Map();
+
 let currentAircraftId = null;
+let landedAircraftId = null;
+let landedUntil = 0;
 
-/*
-   OFFICIAL LKPR RUNWAY THRESHOLDS
-
-   Coordinates converted from the Czech AIP.
-*/
 const runways = [
-    {
-        runway: "06",
-        heading: 60,
-        lat: 50.101836,
-        lon: 14.226300
-    },
-    {
-        runway: "24",
-        heading: 240,
-        lat: 50.115950,
-        lon: 14.273367
-    },
-    {
-        runway: "12",
-        heading: 122,
-        lat: 50.108011,
-        lon: 14.245367
-    },
-    {
-        runway: "30",
-        heading: 302,
-        lat: 50.090467,
-        lon: 14.281672
-    }
+    { runway: "06", heading: 60,  lat: 50.101836, lon: 14.226300 },
+    { runway: "24", heading: 240, lat: 50.115950, lon: 14.273367 },
+    { runway: "12", heading: 122, lat: 50.108011, lon: 14.245367 },
+    { runway: "30", heading: 302, lat: 50.090467, lon: 14.281672 }
 ];
 
 function distanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
 
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const dLat =
+        (lat2 - lat1) * Math.PI / 180;
+
+    const dLon =
+        (lon2 - lon1) * Math.PI / 180;
 
     const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
         Math.cos(lat1 * Math.PI / 180) *
         Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     return R * 2 * Math.atan2(
         Math.sqrt(a),
@@ -142,8 +127,12 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 }
 
 function bearingTo(lat1, lon1, lat2, lon2) {
-    const phi1 = lat1 * Math.PI / 180;
-    const phi2 = lat2 * Math.PI / 180;
+    const phi1 =
+        lat1 * Math.PI / 180;
+
+    const phi2 =
+        lat2 * Math.PI / 180;
+
     const deltaLon =
         (lon2 - lon1) * Math.PI / 180;
 
@@ -178,7 +167,12 @@ function headingDifference(a, b) {
 }
 
 function aircraftId(ac) {
-    return ac.hex || ac.r || ac.flight || null;
+    return (
+        ac.hex ||
+        ac.r ||
+        ac.flight ||
+        null
+    );
 }
 
 function numericAltitude(ac) {
@@ -190,7 +184,8 @@ function numericAltitude(ac) {
         return null;
     }
 
-    const value = Number(ac.alt_baro);
+    const value =
+        Number(ac.alt_baro);
 
     return Number.isFinite(value)
         ? value
@@ -208,9 +203,15 @@ function closestRunway(track) {
                 rwy.heading
             );
 
-        if (difference < bestDifference) {
-            bestDifference = difference;
-            best = rwy;
+        if (
+            difference <
+            bestDifference
+        ) {
+            bestDifference =
+                difference;
+
+            best =
+                rwy;
         }
     });
 
@@ -218,6 +219,27 @@ function closestRunway(track) {
         runway: best,
         difference: bestDifference
     };
+}
+
+function clearDisplay() {
+    const airline =
+        document.querySelector(".airline");
+
+    const details =
+        document.querySelector(".details");
+
+    const status =
+        document.querySelector(".status");
+
+    airline.textContent = "";
+    details.textContent = "";
+    status.textContent = "";
+
+    updateApproachGraphic(
+        null,
+        0,
+        false
+    );
 }
 
 function scoreAircraft(ac) {
@@ -243,13 +265,6 @@ function scoreAircraft(ac) {
     const altitude =
         numericAltitude(ac);
 
-    if (
-    altitude !== null &&
-    altitude > 7000
-) {
-    return -9999;
-}
-
     const verticalRate =
         Number(ac.baro_rate);
 
@@ -262,16 +277,69 @@ function scoreAircraft(ac) {
             : undefined;
 
     /*
-       IGNORE DISTANT AIRCRAFT
+       NEVER SELECT AIRCRAFT
+       ALREADY ON THE GROUND
     */
-    if (airportDistance > 15) {
+
+    if (
+        ac.alt_baro === "ground"
+    ) {
         return -9999;
     }
 
     /*
-       IS IT POINTING TOWARD PRAGUE?
+       DON'T RESELECT THE AIRCRAFT
+       WE JUST WATCHED LAND
     */
-    if (Number.isFinite(track)) {
+
+    if (
+        landedAircraftId &&
+        id === landedAircraftId
+    ) {
+        return -9999;
+    }
+
+    /*
+       MAXIMUM SEARCH RANGE
+    */
+
+    if (
+        airportDistance > 25
+    ) {
+        return -9999;
+    }
+
+    /*
+       IGNORE HIGH CRUISE TRAFFIC
+    */
+
+    if (
+        altitude !== null &&
+        altitude > 7000
+    ) {
+        return -9999;
+    }
+
+    /*
+       HARD REJECT STRONG CLIMBING
+       DEPARTURES
+    */
+
+    if (
+        Number.isFinite(verticalRate) &&
+        verticalRate > 250
+    ) {
+        return -9999;
+    }
+
+    /*
+       AIRCRAFT SHOULD BE HEADING
+       TOWARD PRAGUE
+    */
+
+    if (
+        Number.isFinite(track)
+    ) {
         const airportBearing =
             bearingTo(
                 lat,
@@ -286,107 +354,134 @@ function scoreAircraft(ac) {
                 airportBearing
             );
 
-        if (towardDifference < 20) {
-            score += 180;
-        }
-        else if (towardDifference < 35) {
-            score += 120;
-        }
-        else if (towardDifference < 50) {
-            score += 50;
-        }
-        else {
-            score -= 180;
+        if (
+            towardDifference > 55
+        ) {
+            return -9999;
         }
 
-        /*
-           DOES ITS TRACK MATCH A PRAGUE RUNWAY?
-        */
+        if (
+            towardDifference < 20
+        ) {
+            score += 180;
+        }
+        else if (
+            towardDifference < 35
+        ) {
+            score += 120;
+        }
+        else {
+            score += 50;
+        }
+
         const runwayMatch =
             closestRunway(track);
 
-        if (runwayMatch.difference < 15) {
+        if (
+            runwayMatch.difference < 15
+        ) {
             score += 130;
         }
-        else if (runwayMatch.difference < 30) {
+        else if (
+            runwayMatch.difference < 30
+        ) {
             score += 70;
-        }
-        else if (runwayMatch.difference > 50) {
-            score -= 60;
         }
     }
 
     /*
-       IS IT GETTING CLOSER?
+       MOVEMENT TOWARD AIRPORT
     */
-    if (previousDistance !== undefined) {
+
+    if (
+        previousDistance !== undefined
+    ) {
         const change =
             previousDistance -
             airportDistance;
 
-        if (change > 0.15) {
+        if (
+            change > 0.15
+        ) {
             score += 180;
         }
-        else if (change > 0.03) {
+        else if (
+            change > 0.03
+        ) {
             score += 100;
         }
-        else if (change < -0.15) {
-            score -= 220;
-        }
-        else if (change < -0.03) {
-            score -= 120;
+        else if (
+            change < -0.05
+        ) {
+            return -9999;
         }
     }
 
     /*
        DISTANCE
     */
-    if (airportDistance < 3) {
+
+    if (
+        airportDistance < 3
+    ) {
         score += 80;
     }
-    else if (airportDistance < 6) {
+    else if (
+        airportDistance < 6
+    ) {
         score += 60;
     }
-    else if (airportDistance < 10) {
+    else if (
+        airportDistance < 10
+    ) {
         score += 35;
     }
-    else {
-        score += 10;
+    else if (
+        airportDistance < 15
+    ) {
+        score += 20;
     }
 
     /*
        ALTITUDE
     */
-    if (altitude !== null) {
-        if (altitude < 1500) {
+
+    if (
+        altitude !== null
+    ) {
+        if (
+            altitude < 1500
+        ) {
             score += 70;
         }
-        else if (altitude < 3000) {
+        else if (
+            altitude < 3000
+        ) {
             score += 50;
         }
-        else if (altitude < 5000) {
+        else if (
+            altitude < 5000
+        ) {
             score += 20;
-        }
-        else if (altitude > 7000) {
-            score -= 100;
         }
     }
 
     /*
-       DESCENDING / CLIMBING
+       DESCENDING
     */
-    if (Number.isFinite(verticalRate)) {
-        if (verticalRate < -500) {
+
+    if (
+        Number.isFinite(verticalRate)
+    ) {
+        if (
+            verticalRate < -500
+        ) {
             score += 80;
         }
-        else if (verticalRate < -100) {
+        else if (
+            verticalRate < -100
+        ) {
             score += 50;
-        }
-        else if (verticalRate > 700) {
-            score -= 140;
-        }
-        else if (verticalRate > 250) {
-            score -= 80;
         }
     }
 
@@ -394,9 +489,6 @@ function scoreAircraft(ac) {
     if (ac.r) score += 10;
     if (ac.t) score += 10;
 
-    /*
-       KEEP CURRENT AIRCRAFT STABLE
-    */
     if (
         id &&
         id === currentAircraftId
@@ -405,6 +497,117 @@ function scoreAircraft(ac) {
     }
 
     return score;
+}
+
+function updateApproachGraphic(
+    runway,
+    distance,
+    landed
+) {
+    const plane =
+        document.getElementById("plane");
+
+    const runwayGraphic =
+        document.getElementById("runway");
+
+    const runwayLabel =
+        document.getElementById("runwayLabel");
+
+    if (
+        !plane ||
+        !runwayGraphic ||
+        !runwayLabel
+    ) {
+        return;
+    }
+
+    if (!runway) {
+        plane.style.display = "none";
+        runwayGraphic.classList.remove("visible");
+        runwayLabel.textContent = "";
+        return;
+    }
+
+    plane.style.display = "block";
+
+    runwayLabel.textContent =
+        "RWY " + runway.runway;
+
+    const leftToRight =
+        runway.runway === "06" ||
+        runway.runway === "12";
+
+    if (leftToRight) {
+        plane.classList.remove("reverse");
+    }
+    else {
+        plane.classList.add("reverse");
+    }
+
+    const maxDistance = 15;
+
+    const clamped =
+        Math.max(
+            0,
+            Math.min(
+                maxDistance,
+                distance
+            )
+        );
+
+    const progress =
+        1 -
+        (clamped / maxDistance);
+
+    let x;
+
+    if (leftToRight) {
+        x =
+            4 +
+            progress * 58;
+    }
+    else {
+        x =
+            68 -
+            progress * 58;
+    }
+
+    let y =
+        4 +
+        progress * 48;
+
+    if (!landed) {
+        if (leftToRight) {
+            plane.style.transform =
+                "rotate(7deg)";
+        }
+        else {
+            plane.style.transform =
+                "rotate(-7deg)";
+        }
+    }
+
+    if (landed) {
+        y = 49;
+
+        plane.style.transform =
+            "rotate(0deg)";
+
+        runwayGraphic.classList.add(
+            "visible"
+        );
+    }
+    else {
+        runwayGraphic.classList.remove(
+            "visible"
+        );
+    }
+
+    plane.style.left =
+        x + "%";
+
+    plane.style.top =
+        y + "px";
 }
 
 async function updateAircraft() {
@@ -417,6 +620,33 @@ async function updateAircraft() {
     const status =
         document.querySelector(".status");
 
+    /*
+       AFTER LANDING:
+       HOLD THE MESSAGE FOR 10 SECONDS
+    */
+
+    if (
+        landedUntil > 0 &&
+        Date.now() < landedUntil
+    ) {
+        return;
+    }
+
+    /*
+       AFTER 10 SECONDS:
+       CLEAR THE AIRCRAFT AREA
+    */
+
+    if (
+        landedUntil > 0 &&
+        Date.now() >= landedUntil
+    ) {
+        landedUntil = 0;
+        currentAircraftId = null;
+
+        clearDisplay();
+    }
+
     try {
         const response =
             await fetch(
@@ -425,7 +655,8 @@ async function updateAircraft() {
 
         if (!response.ok) {
             throw new Error(
-                "HTTP " + response.status
+                "HTTP " +
+                response.status
             );
         }
 
@@ -443,14 +674,7 @@ async function updateAircraft() {
             !data.ac ||
             data.ac.length === 0
         ) {
-            airline.textContent =
-                "NO AIRCRAFT NEARBY";
-
-            details.textContent = "";
-
-            status.textContent =
-                "WAITING FOR TRAFFIC";
-
+            clearDisplay();
             return;
         }
 
@@ -469,6 +693,22 @@ async function updateAircraft() {
                     return false;
                 }
 
+                if (
+                    ac.alt_baro === "ground"
+                ) {
+                    return false;
+                }
+
+                const altitude =
+                    numericAltitude(ac);
+
+                if (
+                    altitude !== null &&
+                    altitude > 7000
+                ) {
+                    return false;
+                }
+
                 const distance =
                     distanceKm(
                         lat,
@@ -478,22 +718,19 @@ async function updateAircraft() {
                     );
 
                 return (
-                    distance <= 15 &&
-                    (ac.flight || ac.r || ac.t)
+                    distance <= 25 &&
+                    (
+                        ac.flight ||
+                        ac.r ||
+                        ac.t
+                    )
                 );
             });
 
-        if (candidates.length === 0) {
-            airline.textContent =
-                "NO PRAGUE ARRIVAL";
-
-            details.textContent = "";
-
-            status.textContent =
-                "WAITING FOR NEXT ARRIVAL";
-
-            currentAircraftId = null;
-
+        if (
+            candidates.length === 0
+        ) {
+            clearDisplay();
             return;
         }
 
@@ -506,18 +743,12 @@ async function updateAircraft() {
         const aircraft =
             candidates[0];
 
-        const aircraftScore =
+        const score =
             scoreAircraft(aircraft);
 
-        if (aircraftScore < 100) {
-            airline.textContent =
-                "NO PRAGUE ARRIVAL";
-
-            details.textContent = "";
-
-            status.textContent =
-                "WAITING FOR NEXT ARRIVAL";
-
+        if (
+            score < 100
+        ) {
             currentAircraftId = null;
 
             candidates.forEach(ac => {
@@ -537,6 +768,7 @@ async function updateAircraft() {
                 );
             });
 
+            clearDisplay();
             return;
         }
 
@@ -564,38 +796,40 @@ async function updateAircraft() {
             aircraft.flight &&
             aircraft.flight.trim()
                 ? aircraft.flight.trim()
-                : "UNKNOWN FLIGHT";
+                : "";
 
         const registration =
-            aircraft.r ||
-            "REG UNKNOWN";
+            aircraft.r || "";
 
         const type =
-            aircraft.t ||
-            "TYPE UNKNOWN";
+            aircraft.t || "";
 
         const track =
-            Number(aircraft.track);
+            Number(
+                aircraft.track
+            );
 
         const altitude =
-            numericAltitude(aircraft);
+            numericAltitude(
+                aircraft
+            );
 
         let selectedRunway = null;
 
-        if (Number.isFinite(track)) {
+        if (
+            Number.isFinite(track)
+        ) {
             const match =
                 closestRunway(track);
 
-            if (match.difference <= 35) {
+            if (
+                match.difference <= 35
+            ) {
                 selectedRunway =
                     match.runway;
             }
         }
 
-        /*
-           FALLBACK TO AIRPORT DISTANCE
-           IF NO RUNWAY CAN BE IDENTIFIED
-        */
         let displayDistance =
             distanceKm(
                 Number(aircraft.lat),
@@ -604,11 +838,9 @@ async function updateAircraft() {
                 airportLon
             );
 
-        /*
-           IF RUNWAY IS KNOWN,
-           MEASURE TO ACTUAL RUNWAY THRESHOLD
-        */
-        if (selectedRunway) {
+        if (
+            selectedRunway
+        ) {
             displayDistance =
                 distanceKm(
                     Number(aircraft.lat),
@@ -618,20 +850,48 @@ async function updateAircraft() {
                 );
         }
 
-        /*
-           LANDED DETECTION
-        */
-        const onGround =
-            aircraft.alt_baro === "ground";
-
         const reachedRunway =
             selectedRunway &&
             displayDistance <= 0.6;
 
+        if (
+            reachedRunway
+        ) {
+            landedAircraftId =
+                aircraftId(aircraft);
+
+            landedUntil =
+                Date.now() + 10000;
+
+            airline.textContent =
+                callsign;
+
+            details.textContent =
+                [
+                    type,
+                    registration
+                ]
+                .filter(Boolean)
+                .join("  •  ");
+
+            status.textContent =
+                "LANDED  •  PRAGUE";
+
+            updateApproachGraphic(
+                selectedRunway,
+                0,
+                true
+            );
+
+            return;
+        }
+
         let arrivalStatus =
             "INBOUND";
 
-        if (displayDistance <= 8) {
+        if (
+            displayDistance <= 8
+        ) {
             arrivalStatus =
                 "APPROACHING";
         }
@@ -647,51 +907,38 @@ async function updateAircraft() {
                 "ON FINAL";
         }
 
-        if (
-            onGround ||
-            reachedRunway
-        ) {
-            arrivalStatus =
-                "LANDED";
-        }
-
         airline.textContent =
             callsign;
 
         details.textContent =
-            type +
-            "  •  " +
-            registration;
+            [
+                type,
+                registration
+            ]
+            .filter(Boolean)
+            .join("  •  ");
 
-        if (arrivalStatus === "LANDED") {
-            status.textContent =
-                "LANDED  •  PRAGUE";
-        }
-        else {
-            status.textContent =
-                arrivalStatus +
-                (
-                    selectedRunway
-                        ? " RWY " +
-                          selectedRunway.runway
-                        : ""
-                ) +
-                "  •  " +
-                displayDistance.toFixed(1) +
-                " KM";
-        }
+        status.textContent =
+            arrivalStatus +
+            (
+                selectedRunway
+                    ? " RWY " +
+                      selectedRunway.runway
+                    : ""
+            ) +
+            "  •  " +
+            displayDistance.toFixed(1) +
+            " KM";
+
+        updateApproachGraphic(
+            selectedRunway,
+            displayDistance,
+            false
+        );
     }
 
     catch (error) {
-        airline.textContent =
-            "AIRCRAFT DATA";
-
-        details.textContent =
-            "CONNECTION ERROR";
-
-        status.textContent =
-            "RETRYING...";
-
+        clearDisplay();
         console.error(error);
     }
 }
