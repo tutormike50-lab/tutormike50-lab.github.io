@@ -2990,6 +2990,12 @@ function announceDeparture(ac){
 
     const departed=
         !onGround(ac);
+   if(departed){
+
+    removeTicker(
+        "EXPECTED_DEPARTURE:"+id
+    );
+}
 
 
     const popupKey=
