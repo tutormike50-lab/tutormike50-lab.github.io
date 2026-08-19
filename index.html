@@ -1089,6 +1089,22 @@ const landedBlacklist=
     new Map();
 
 
+/* One-shot popup + 60-second rail memory */
+const popupShown=
+    new Map();
+
+const railShown=
+    new Map();
+
+
+/* Optional route enrichment. It never controls tracking. */
+const routeCache=
+    new Map();
+
+const ROUTE_API=
+    "https://api.adsb.lol/api/0/routeset";
+
+
 let activeDeparture=null;
 
 let popupTimer=null;
@@ -2317,6 +2333,201 @@ function liveAircraftDetail(ac){
 
 
 /* =====================================================
+   OPTIONAL ROUTE / DESTINATION LOOKUP
+
+   Cached by callsign. Failure simply leaves route blank.
+===================================================== */
+
+function routeCallsign(ac){
+
+    return (ac.flight||"")
+        .trim()
+        .toUpperCase();
+}
+
+
+function airportCode(value){
+
+    if(!value)
+        return "";
+
+    if(typeof value==="string")
+        return value.trim().toUpperCase();
+
+    if(typeof value==="object"){
+
+        return (
+            value.iata
+            || value.iata_code
+            || value.icao
+            || value.icao_code
+            || value.code
+            || value.ident
+            || ""
+        ).toString().trim().toUpperCase();
+    }
+
+    return "";
+}
+
+
+function parseRouteRow(data,callsign){
+
+    let rows=[];
+
+    if(Array.isArray(data))
+        rows=data;
+    else if(data && Array.isArray(data.routes))
+        rows=data.routes;
+    else if(data && Array.isArray(data.planes))
+        rows=data.planes;
+    else if(data && typeof data==="object")
+        rows=[data];
+
+    let row=
+        rows.find(item=>{
+            if(!item || typeof item!=="object")
+                return false;
+
+            const cs=(
+                item.callsign
+                || item.flight
+                || item.call
+                || ""
+            ).toString().trim().toUpperCase();
+
+            return !cs || cs===callsign;
+        })
+        || rows[0]
+        || null;
+
+    if(!row)
+        return null;
+
+    if(Array.isArray(row)){
+
+        const codes=row
+            .filter(value=>typeof value==="string")
+            .map(value=>value.trim().toUpperCase())
+            .filter(value=>/^[A-Z]{3,4}$/.test(value));
+
+        if(codes.length>=2)
+            return {from:codes[codes.length-2],to:codes[codes.length-1]};
+
+        return null;
+    }
+
+    const from=airportCode(
+        row.from
+        || row.origin
+        || row.orig
+        || row.departure
+        || row.departure_airport
+        || row.airport_from
+    );
+
+    const to=airportCode(
+        row.to
+        || row.destination
+        || row.dest
+        || row.arrival
+        || row.arrival_airport
+        || row.airport_to
+    );
+
+    if(from || to)
+        return {from,to};
+
+    const route=(row.route||row.airports||"").toString().toUpperCase();
+    const codes=route.match(/\b[A-Z]{3,4}\b/g)||[];
+
+    if(codes.length>=2)
+        return {from:codes[0],to:codes[codes.length-1]};
+
+    return null;
+}
+
+
+async function ensureRoute(ac){
+
+    const cs=routeCallsign(ac);
+
+    if(!cs)
+        return null;
+
+    const cached=routeCache.get(cs);
+
+    if(cached && Date.now()-cached.time<6*60*60*1000)
+        return cached.route;
+
+    /* Mark as pending immediately so the 3-second engine
+       cannot hammer the route service. */
+    routeCache.set(cs,{time:Date.now(),route:null,pending:true});
+
+    try{
+
+        const response=await fetch(
+            ROUTE_API,
+            {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({
+                    planes:[{
+                        callsign:cs,
+                        lat:Number(ac.lat),
+                        lng:Number(ac.lon)
+                    }]
+                })
+            }
+        );
+
+        if(!response.ok)
+            throw new Error("Route HTTP "+response.status);
+
+        const data=await response.json();
+        const route=parseRouteRow(data,cs);
+
+        routeCache.set(cs,{time:Date.now(),route,pending:false});
+        return route;
+    }
+    catch(error){
+
+        console.warn("Route lookup unavailable",cs,error);
+        routeCache.set(cs,{time:Date.now(),route:null,pending:false});
+        return null;
+    }
+}
+
+
+function cachedRoute(ac){
+
+    const item=routeCache.get(routeCallsign(ac));
+    return item ? item.route : null;
+}
+
+
+function routeLabel(ac,state){
+
+    const route=cachedRoute(ac);
+
+    if(!route)
+        return "";
+
+    if(state==="ARRIVAL" || state==="ARRIVED"){
+        if(route.from && route.from!==AIRPORT.code && route.from!==AIRPORT.icao)
+            return "FROM • "+route.from;
+    }
+
+    if(state==="DEPARTURE" || state==="DEPARTED"){
+        if(route.to && route.to!==AIRPORT.code && route.to!==AIRPORT.icao)
+            return "DESTINATION • "+route.to;
+    }
+
+    return "";
+}
+
+
+/* =====================================================
    COLOURED AIRLINE TAIL
 ===================================================== */
 
@@ -2417,8 +2628,8 @@ function setTail(ac){
 /* =====================================================
    BIG ARRIVAL / DEPARTURE POPUP
 
-   Locked for 16 seconds.
-   Arrival may override departure.
+   Shown once per aircraft for exactly 15 seconds.
+   It cannot reopen for the same aircraft.
 ===================================================== */
 
 function showPopup(
@@ -2426,133 +2637,71 @@ function showPopup(
     state
 ){
 
-    const now=
-        Date.now();
+    const now=Date.now();
+    const id=aircraftId(ac);
 
-
-    const id=
-        aircraftId(ac);
-
-
-    if(
-        now<popupBusyUntil
-        &&
-        !(
-            state==="ARRIVAL"
-            &&
-            popupDirection==="DEPARTURE"
-        )
-    )
+    if(!id)
         return;
 
-
-    if(
-        popupAircraft===id
-        &&
-        popupDirection===state
-        &&
-        now<popupBusyUntil
-    )
+    /* Once this aircraft has had its popup, it cannot
+       open the popup again during this movement. */
+    if(popupShown.has(id))
         return;
 
+    /* Do not interrupt a popup that is already on screen. */
+    if(now<popupBusyUntil)
+        return;
 
-    popupBusyUntil=
-        now+16000;
+    popupShown.set(id,now);
 
+    popupBusyUntil=now+15000;
+    popupDirection=state;
+    popupAircraft=id;
 
-    popupDirection=
-        state;
-
-
-    popupAircraft=
-        id;
-
-
-    const popup=
-        document
-        .getElementById(
-            "popup"
-        );
-
+    const popup=document.getElementById("popup");
 
     popup.className=
-        "popup "
-        +
-        (
-            state==="DEPARTURE"
-            ?
-            "departure"
-            :
-            ""
-        );
+        "popup "+
+        (state==="DEPARTURE" ? "departure" : "");
 
+    document.getElementById("popupState").textContent=state;
+    document.getElementById("popupFlight").textContent=aircraftTitle(ac);
 
-    document
-    .getElementById(
-        "popupState"
-    )
-    .textContent=
-        state;
+    const paintDetails=()=>{
 
+        const parts=[liveAircraftDetail(ac)];
+        const route=routeLabel(ac,state);
 
-    document
-    .getElementById(
-        "popupFlight"
-    )
-    .textContent=
-        aircraftTitle(ac);
+        if(route)
+            parts.push(route);
 
+        document.getElementById("popupDetails").textContent=
+            parts.filter(Boolean).join(" • ");
+    };
 
-    document
-    .getElementById(
-        "popupDetails"
-    )
-    .textContent=
-        liveAircraftDetail(ac);
-
-
+    paintDetails();
     setTail(ac);
 
-
-    popup.classList.remove(
-        "show"
-    );
-
-
+    popup.classList.remove("show");
     void popup.offsetWidth;
+    popup.classList.add("show");
 
+    /* Route enrichment is optional and asynchronous. */
+    ensureRoute(ac).then(()=>{
+        if(popupAircraft===id && popupDirection===state)
+            paintDetails();
+    });
 
-    popup.classList.add(
-        "show"
-    );
+    clearTimeout(popupTimer);
 
+    popupTimer=setTimeout(()=>{
 
-    clearTimeout(
-        popupTimer
-    );
+        popup.classList.remove("show");
+        popupDirection=null;
+        popupAircraft=null;
 
-
-    popupTimer=
-        setTimeout(
-            ()=>{
-
-                popup.classList.remove(
-                    "show"
-                );
-
-
-                popupDirection=
-                    null;
-
-
-                popupAircraft=
-                    null;
-
-            },
-            16000
-        );
+    },15000);
 }
-
 
 /* =====================================================
    LATEST MOVEMENT
@@ -2580,109 +2729,81 @@ function movement(
    INFORMATION RAIL
 ===================================================== */
 
+function railAllowed(ac,tag){
+
+    const id=aircraftId(ac);
+
+    if(!id)
+        return false;
+
+    const key=tag+":"+id;
+    const now=Date.now();
+
+    if(!railShown.has(key))
+        railShown.set(key,now);
+
+    return now-railShown.get(key)<60000;
+}
+
+
 function railItems(){
 
     const items=[];
 
+    if(nextArrival && railAllowed(nextArrival.ac,"NEXT ARRIVAL")){
 
-    if(nextArrival){
+        ensureRoute(nextArrival.ac);
 
         items.push({
-
-            tag:
-                "NEXT ARRIVAL",
-
-            state:
-                "EXPECTED",
-
-            ac:
-                nextArrival.ac,
-
-            extra:
-                nextArrival
-                .distance
-                .toFixed(1)
-                +
-                " KM"
-
+            tag:"NEXT ARRIVAL",
+            state:"EXPECTED",
+            ac:nextArrival.ac,
+            routeState:"ARRIVAL",
+            extra:nextArrival.distance.toFixed(1)+" KM"
         });
     }
 
+    if(nextDeparture && railAllowed(nextDeparture.ac,"NEXT DEPARTURE")){
 
-    if(nextDeparture){
+        ensureRoute(nextDeparture.ac);
 
         items.push({
-
-            tag:
-                "NEXT DEPARTURE",
-
-            state:
-                "EXPECTED",
-
-            ac:
-                nextDeparture.ac,
-
-            extra:
-                Math.round(
-                    groundSpeed(
-                        nextDeparture.ac
-                    )
-                )
-                +
-                " KT"
-
+            tag:"NEXT DEPARTURE",
+            state:"EXPECTED",
+            ac:nextDeparture.ac,
+            routeState:"DEPARTURE",
+            extra:Math.round(groundSpeed(nextDeparture.ac))+" KT"
         });
     }
-
 
     if(
         lastMovement
-        &&
-        Date.now()
-        -
-        lastMovement.time
-        <
-        6*60*1000
+        && Date.now()-lastMovement.time<60000
+        && railAllowed(lastMovement.ac,lastMovement.state)
     ){
 
+        ensureRoute(lastMovement.ac);
+
         items.push({
-
-            tag:
-                "LATEST",
-
-            state:
-                lastMovement.state,
-
-            ac:
-                lastMovement.ac,
-
-            done:
-                true
-
+            tag:"LATEST",
+            state:lastMovement.state,
+            ac:lastMovement.ac,
+            routeState:lastMovement.state,
+            done:true
         });
     }
-
 
     if(!items.length){
 
         items.push({
-
-            tag:
-                "PRG LIVE",
-
-            state:
-                "MONITORING",
-
-            text:
-                "WAITING FOR QUALIFYING COMMERCIAL ARRIVAL OR DEPARTURE"
-
+            tag:"PRG LIVE",
+            state:"LIVE",
+            text:"PRAGUE AIRPORT • ADS-B BROADCAST"
         });
     }
 
-
     return items;
 }
-
 
 function renderRail(){
 
@@ -2719,10 +2840,25 @@ function renderRail(){
 
     if(item.ac){
 
+        const route=
+            routeLabel(
+                item.ac,
+                item.routeState||item.state
+            );
+
+
+        const extraParts=[];
+
+        if(route)
+            extraParts.push(route);
+
+        if(item.extra)
+            extraParts.push(item.extra);
+
         const extra=
-            item.extra
+            extraParts.length
             ?
-            " • "+item.extra
+            " • "+extraParts.join(" • ")
             :
             "";
 
@@ -2841,13 +2977,34 @@ function cleanup(){
     }
 
 
+    for(const [id,time] of popupShown){
+
+        if(now-time>30*60*1000)
+            popupShown.delete(id);
+    }
+
+
+    for(const [key,time] of railShown){
+
+        if(now-time>10*60*1000)
+            railShown.delete(key);
+    }
+
+
+    for(const [key,item] of routeCache){
+
+        if(now-item.time>6*60*60*1000)
+            routeCache.delete(key);
+    }
+
+
     if(
         lastMovement
         &&
         now-
         lastMovement.time
         >
-        6*60*1000
+        60000
     ){
 
         lastMovement=
