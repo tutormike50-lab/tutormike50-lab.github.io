@@ -1,43 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <style>
 
-html,body{
+/* =========================================================
+   BASIC PAGE
+========================================================= */
+
+:root{
+    --ribbon-height:110px;
+    --ticker-height:27px;
+
+    --blue-dark:#002e5b;
+    --blue-mid:#005b9f;
+    --blue-light:#0b7ac3;
+
+    --silver:#d7dde2;
+    --yellow:#ffd84d;
+    --red:#ff4949;
+}
+
+html,
+body{
     margin:0;
     padding:0;
+
     width:100%;
     height:100%;
+
     background:transparent;
+
     overflow:hidden;
-    font-family:Arial,Helvetica,sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
+
+
+/* =========================================================
+   PERMANENT RIBBON
+========================================================= */
 
 .ribbon{
     position:absolute;
+
     left:0;
     bottom:0;
 
     width:100%;
-    height:110px;
+    height:var(--ribbon-height);
 
     background:
         linear-gradient(
             90deg,
-            #003d78,
-            #0062ad,
-            #003d78
+            #002f5e 0%,
+            #005c9d 43%,
+            #004a85 70%,
+            #002d59 100%
         );
 
-    border-top:2px solid #45aaff;
+    border-top:
+        2px solid
+        rgba(126,201,255,.85);
 
-box-shadow:
-    0 2px 8px rgba(0,0,0,.30);
+    box-shadow:
+        0 2px 8px
+        rgba(0,0,0,.30);
 
-color:white;
+    color:white;
+
+    z-index:50;
+
+    box-sizing:border-box;
+}
+
+
+/* =========================================================
+   MAIN RIBBON AREA
+========================================================= */
+
+.ribbon-main{
+    height:
+        calc(
+            var(--ribbon-height)
+            -
+            var(--ticker-height)
+        );
 
     display:flex;
     align-items:center;
@@ -46,30 +101,30 @@ color:white;
 }
 
 
-/* =========================
-   PRG
-========================= */
+/* =========================================================
+   PRG IDENTITY
+========================================================= */
 
 .airport{
-    width:13%;
-    height:75%;
+    width:19%;
+    height:74%;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    box-sizing:border-box;
-
     border-right:
         1px solid
-        rgba(255,255,255,.30);
+        rgba(255,255,255,.28);
+
+    box-sizing:border-box;
 }
 
 .airport-mark{
     display:flex;
     align-items:center;
-    justify-content:center;
-    gap:10px;
+
+    gap:11px;
 }
 
 .prg-wrap{
@@ -80,13 +135,14 @@ color:white;
 
 .live{
     font-size:11px;
-    font-weight:bold;
+
+    font-weight:900;
 
     color:#ff5a5a;
 
-    margin-bottom:1px;
+    letter-spacing:1.2px;
 
-    letter-spacing:1px;
+    margin-bottom:1px;
 }
 
 .prg{
@@ -96,7 +152,8 @@ color:white;
         Arial,
         sans-serif;
 
-    font-size:34px;
+    font-size:36px;
+
     font-weight:800;
 
     letter-spacing:3px;
@@ -105,9 +162,9 @@ color:white;
         linear-gradient(
             180deg,
             #ffffff 0%,
-            #d6d6d6 35%,
-            #8f9aa3 60%,
-            #f3f3f3 100%
+            #d7dce0 33%,
+            #89949c 60%,
+            #f1f4f6 100%
         );
 
     -webkit-background-clip:text;
@@ -116,18 +173,23 @@ color:white;
     color:transparent;
 
     text-shadow:
-        0 1px 0 rgba(255,255,255,.35),
-        0 2px 4px rgba(0,0,0,.55);
+        0 1px 0
+        rgba(255,255,255,.35),
+
+        0 2px 4px
+        rgba(0,0,0,.55);
 }
 
 
-/* SILVER AIRPORT CONTROL TOWER */
+/* =========================================================
+   SILVER CONTROL TOWER
+========================================================= */
 
 .tower-icon{
     position:relative;
 
-    width:28px;
-    height:48px;
+    width:29px;
+    height:49px;
 
     flex-shrink:0;
 
@@ -145,14 +207,14 @@ color:white;
     bottom:0;
 
     width:9px;
-    height:30px;
+    height:31px;
 
     background:
         linear-gradient(
             90deg,
-            #727d86,
+            #717b84,
             #eeeeee,
-            #808a92
+            #7d8790
         );
 
     clip-path:
@@ -170,14 +232,14 @@ color:white;
     left:3px;
     top:7px;
 
-    width:22px;
+    width:23px;
     height:13px;
 
     background:
         linear-gradient(
             180deg,
             #f5f5f5,
-            #8b969e
+            #89949c
         );
 
     clip-path:
@@ -202,9 +264,9 @@ color:white;
 
     height:4px;
 
-    background:#264d69;
+    background:#204c69;
 
-    opacity:.75;
+    opacity:.78;
 }
 
 .tower-light{
@@ -216,7 +278,7 @@ color:white;
     width:2px;
     height:8px;
 
-    background:#c9d0d5;
+    background:#cbd1d6;
 }
 
 .tower-light:before{
@@ -235,444 +297,960 @@ color:white;
     background:#ff3b3b;
 
     box-shadow:
-        0 0 6px
-        rgba(255,50,50,.8);
+        0 0 7px
+        rgba(255,50,50,.9);
 
-    animation:towerBlink 1.7s infinite;
+    animation:
+        towerBlink
+        1.7s infinite;
 }
 
 @keyframes towerBlink{
 
-    0%,45%,100%{
-        opacity:.15;
+    0%,
+    45%,
+    100%{
+        opacity:.18;
     }
 
-    50%,60%{
+    50%,
+    60%{
         opacity:1;
     }
 }
 
-/* =========================
-   LOGO
-========================= */
 
-.logo-area{
-    width:12%;
-    height:75%;
+/* =========================================================
+   CENTRE BROADCAST IDENTITY
+========================================================= */
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.broadcast-centre{
+    width:56%;
+
+    padding-left:28px;
 
     box-sizing:border-box;
-
-    border-right:
-        1px solid
-        rgba(255,255,255,.22);
 }
 
-.airline-logo{
-    max-width:78px;
-    max-height:55px;
+.broadcast-title{
+    font-size:22px;
 
-    object-fit:contain;
-
-    display:none;
-
-    filter:
-        drop-shadow(
-            0 2px 4px
-            rgba(0,0,0,.35)
-        );
-}
-
-.logo-fallback{
-    width:58px;
-    height:58px;
-
-    border-radius:50%;
-
-    background:
-        rgba(0,20,50,.35);
-
-    border:
-        2px solid
-        rgba(255,255,255,.65);
-
-    display:none;
-    align-items:center;
-    justify-content:center;
-
-    font-size:17px;
     font-weight:900;
 
-    letter-spacing:1px;
+    letter-spacing:2px;
 
     color:white;
 }
 
+.broadcast-sub{
+    margin-top:4px;
 
-/* =========================
-   AIRCRAFT INFO
-========================= */
+    font-size:13px;
 
-.info{
-    width:50%;
-
-    padding-left:24px;
-
-    box-sizing:border-box;
-}
-
-.airline{
-    font-size:25px;
-    font-weight:bold;
-
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.details{
-    margin-top:7px;
-
-    font-size:17px;
+    letter-spacing:1.5px;
 
     color:
-        rgba(255,255,255,.82);
+        rgba(215,235,250,.76);
+}
+
+
+/* =========================================================
+   RIGHT SIDE
+========================================================= */
+
+.broadcast-right{
+    width:25%;
+    height:68%;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-left:
+        1px solid
+        rgba(255,255,255,.20);
+}
+
+.tracking-chip{
+    padding:
+        7px 14px;
+
+    border:
+        1px solid
+        rgba(160,215,255,.50);
+
+    border-radius:4px;
+
+    background:
+        rgba(0,28,55,.30);
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:1.5px;
+
+    color:#bce5ff;
+}
+
+
+/* =========================================================
+   TICKER
+========================================================= */
+
+.ticker{
+    position:absolute;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:var(--ticker-height);
+
+    overflow:hidden;
+
+    background:
+        rgba(0,18,37,.82);
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.16);
+
+    box-sizing:border-box;
+
+    display:flex;
+    align-items:center;
+}
+
+.ticker-label{
+    position:relative;
+
+    z-index:5;
+
+    height:100%;
+
+    display:flex;
+    align-items:center;
+
+    padding:
+        0 11px;
+
+    flex-shrink:0;
+
+    background:#061e37;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,.20);
+
+    font-size:11px;
+
+    font-weight:900;
+
+    letter-spacing:1.2px;
+
+    color:#9edaff;
+}
+
+.ticker-window{
+    position:relative;
+
+    overflow:hidden;
+
+    flex:1;
+
+    height:100%;
+}
+
+.ticker-track{
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    height:100%;
+
+    display:flex;
+    align-items:center;
 
     white-space:nowrap;
+
+    min-width:max-content;
+
+    animation:
+        tickerMove
+        34s linear infinite;
+
+    padding-left:100%;
+}
+
+@keyframes tickerMove{
+
+    from{
+        transform:
+            translateX(0);
+    }
+
+    to{
+        transform:
+            translateX(-100%);
+    }
+}
+
+.ticker-item{
+    display:inline-block;
+
+    margin-right:48px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:.4px;
+
+    color:#e6eef4;
+}
+
+.ticker-item.yellow{
+    color:var(--yellow);
+
+    font-weight:900;
+}
+
+.ticker-item.red{
+    color:#ff6060;
+
+    font-weight:900;
+}
+
+.ticker-item.silver{
+    color:#d4dce2;
+}
+
+
+/* =========================================================
+   AIRCRAFT POP-UP BOX
+========================================================= */
+
+.aircraft-popup{
+    position:absolute;
+
+    left:18px;
+
+    bottom:
+        var(--ribbon-height);
+
+    width:490px;
+    height:168px;
+
+    display:flex;
+
+    box-sizing:border-box;
+
+    padding:12px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(5,26,47,.99),
+            rgba(0,71,125,.98)
+        );
+
+    border:
+        1px solid
+        rgba(185,220,244,.72);
+
+    border-bottom:
+        3px solid
+        #55baff;
+
+    border-radius:
+        12px 12px 0 0;
+
+    box-shadow:
+        0 -7px 24px
+        rgba(0,0,0,.40);
+
+    z-index:45;
+
+    transform:
+        translateY(115%);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:
+        transform .48s
+        cubic-bezier(.22,.80,.25,1),
+
+        opacity .25s ease;
+}
+
+.aircraft-popup.show{
+    transform:
+        translateY(0);
+
+    opacity:1;
+}
+
+
+/* =========================================================
+   POPUP PHOTO
+========================================================= */
+
+.popup-photo-wrap{
+    position:relative;
+
+    width:188px;
+    height:140px;
+
+    flex-shrink:0;
+
+    border-radius:8px;
+
     overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0c2236,
+            #173d58
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.30);
+}
+
+.popup-photo{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    display:none;
+}
+
+.popup-photo.show{
+    display:block;
+}
+
+.popup-logo{
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    flex-direction:column;
+
+    background:
+        linear-gradient(
+            135deg,
+            #09233d,
+            #12517d
+        );
+}
+
+.popup-logo img{
+    max-width:110px;
+    max-height:70px;
+
+    object-fit:contain;
+
+    filter:
+        drop-shadow(
+            0 3px 4px
+            rgba(0,0,0,.35)
+        );
+}
+
+.popup-logo-code{
+    margin-top:7px;
+
+    font-size:25px;
+
+    font-weight:900;
+
+    letter-spacing:2px;
+
+    color:#dce8f0;
+}
+
+.photo-credit{
+    position:absolute;
+
+    left:4px;
+    right:4px;
+    bottom:3px;
+
+    padding:2px 4px;
+
+    font-size:9px;
+
+    color:white;
+
+    background:
+        rgba(0,0,0,.55);
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    display:none;
+}
+
+
+/* =========================================================
+   POPUP INFORMATION
+========================================================= */
+
+.popup-info{
+    flex:1;
+
+    min-width:0;
+
+    padding-left:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+}
+
+.popup-direction{
+    font-size:13px;
+
+    font-weight:900;
+
+    letter-spacing:2.5px;
+
+    color:#ffd65a;
+
+    margin-bottom:5px;
+}
+
+.popup-direction.departure{
+    color:#ff8b55;
+}
+
+.popup-alert{
+    font-size:30px;
+
+    font-weight:900;
+
+    letter-spacing:1.5px;
+
+    line-height:1;
+
+    color:white;
+
+    text-shadow:
+        0 2px 5px
+        rgba(0,0,0,.35);
+
+    margin-bottom:8px;
+}
+
+.popup-flight{
+    font-size:19px;
+
+    font-weight:900;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+.popup-details{
+    margin-top:6px;
+
+    font-size:14px;
+
+    color:
+        rgba(225,238,247,.80);
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
     text-overflow:ellipsis;
 }
 
 
-/* =========================
-   STATUS
-========================= */
+/* =========================================================
+   SMALL EDGE ACCENTS
+========================================================= */
 
-.status{
-    width:25%;
-
-    text-align:center;
-
-    font-size:28px;
-    font-weight:900;
-
-    color:#bde5ff;
-
-    letter-spacing:1px;
+.aircraft-popup.arrival{
+    border-bottom-color:
+        #ffd74f;
 }
 
+.aircraft-popup.departure{
+    border-bottom-color:
+        #ff8550;
+}
+
+.aircraft-popup.landed{
+    border-bottom-color:
+        #75e88c;
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
 </style>
+
 </head>
+
 
 <body>
 
-<div class="ribbon">
 
-    <div class="airport">
+<!-- ======================================================
+     AIRCRAFT ALERT BOX
+====================================================== -->
 
-    <div class="airport-mark">
+<div
+    id="aircraftPopup"
+    class="aircraft-popup"
+>
 
-        <div class="tower-icon">
-            <div class="tower-light"></div>
-            <div class="tower-top"></div>
-            <div class="tower-stem"></div>
-        </div>
-
-        <div class="prg-wrap">
-
-            <div class="live">
-                ● LIVE
-            </div>
-
-            <div class="prg">
-                PRG
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-    <div class="logo-area">
+    <div class="popup-photo-wrap">
 
         <img
-            id="airlineLogo"
-            class="airline-logo"
+            id="popupPhoto"
+            class="popup-photo"
             alt=""
         >
 
         <div
-            id="logoFallback"
-            class="logo-fallback"
+            id="popupLogo"
+            class="popup-logo"
+        >
+
+            <img
+                id="popupLogoImage"
+                alt=""
+            >
+
+            <div
+                id="popupLogoCode"
+                class="popup-logo-code"
+            ></div>
+
+        </div>
+
+        <div
+            id="photoCredit"
+            class="photo-credit"
         ></div>
 
     </div>
 
 
-    <div class="info">
+    <div class="popup-info">
 
-        <div class="airline"></div>
+        <div
+            id="popupDirection"
+            class="popup-direction"
+        >
+            ARRIVAL
+        </div>
 
-        <div class="details"></div>
+        <div
+            id="popupAlert"
+            class="popup-alert"
+        >
+            LANDING
+        </div>
+
+        <div
+            id="popupFlight"
+            class="popup-flight"
+        ></div>
+
+        <div
+            id="popupDetails"
+            class="popup-details"
+        ></div>
 
     </div>
-
-
-    <div class="status"></div>
 
 </div>
 
 
+<!-- ======================================================
+     PERMANENT RIBBON
+====================================================== -->
+
+<div class="ribbon">
+
+    <div class="ribbon-main">
+
+        <div class="airport">
+
+            <div class="airport-mark">
+
+                <div class="tower-icon">
+                    <div class="tower-light"></div>
+                    <div class="tower-top"></div>
+                    <div class="tower-stem"></div>
+                </div>
+
+                <div class="prg-wrap">
+
+                    <div class="live">
+                        ● LIVE
+                    </div>
+
+                    <div
+                        id="airportCode"
+                        class="prg"
+                    >
+                        PRG
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="broadcast-centre">
+
+            <div class="broadcast-title">
+                LIVE AIR TRAFFIC
+            </div>
+
+            <div
+                id="broadcastSub"
+                class="broadcast-sub"
+            >
+                PRAGUE • ADS-B LIVE
+            </div>
+
+        </div>
+
+
+        <div class="broadcast-right">
+
+            <div class="tracking-chip">
+                LIVE TRACKING
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="ticker">
+
+        <div class="ticker-label">
+            PRG LIVE
+        </div>
+
+        <div class="ticker-window">
+
+            <div
+                id="tickerTrack"
+                class="ticker-track"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
 <script>
 
-const API =
-"https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
+/* =========================================================
+   AIRPORT CONFIGURATION
+
+   THIS IS THE PART WE CAN CHANGE LATER
+   FOR OTHER AIRPORTS.
+========================================================= */
+
+const AIRPORT={
+
+    name:"Prague",
+
+    code:"PRG",
+
+    icao:"LKPR",
+
+    lat:50.1008,
+
+    lon:14.2600,
+
+    runwayEnds:[
+
+        {
+            name:"06",
+            heading:60,
+            lat:50.1018361,
+            lon:14.2263000
+        },
+
+        {
+            name:"24",
+            heading:240,
+            lat:50.1159500,
+            lon:14.2733667
+        },
+
+        {
+            name:"12",
+            heading:122,
+            lat:50.1080111,
+            lon:14.2453667
+        },
+
+        {
+            name:"30",
+            heading:302,
+            lat:50.0904667,
+            lon:14.2816722
+        }
+
+    ]
+
+};
 
 
 /* =========================================================
-   AIRLINES
+   API ADDRESSES
+========================================================= */
+
+const AIRCRAFT_API=
+"https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
+
+
+const PHOTO_API=
+"https://mikeaircraft-9hkn.vercel.app/api/photo";
+
+
+/* =========================================================
+   PRESENT AIRPORT
+========================================================= */
+
+document
+.getElementById("airportCode")
+.textContent=
+    AIRPORT.code;
+
+
+document
+.getElementById("broadcastSub")
+.textContent=
+    AIRPORT.name.toUpperCase()
+    +
+    " • ADS-B LIVE";
+
+
+/* =========================================================
+   AIRLINE NAMES
 ========================================================= */
 
 const airlines={
 
     TVS:"SMARTWINGS",
+
     RYR:"RYANAIR",
+
     UAE:"EMIRATES",
+
     PGT:"PEGASUS AIRLINES",
+
     AUA:"AUSTRIAN AIRLINES",
+
     DLH:"LUFTHANSA",
+
     KLM:"KLM",
+
     BAW:"BRITISH AIRWAYS",
+
     EZY:"EASYJET",
+
     WZZ:"WIZZ AIR",
+
     QTR:"QATAR AIRWAYS",
+
     THY:"TURKISH AIRLINES",
+
     AFR:"AIR FRANCE",
+
     SWR:"SWISS",
+
     LOT:"LOT POLISH AIRLINES",
+
     SAS:"SAS",
+
     FIN:"FINNAIR",
+
     IBE:"IBERIA",
+
     TAP:"TAP AIR PORTUGAL",
+
     ITY:"ITA AIRWAYS",
+
     EIN:"AER LINGUS",
+
     VLG:"VUELING",
+
     EWG:"EUROWINGS",
+
     AEE:"AEGEAN AIRLINES",
+
     BTI:"AIRBALTIC",
+
     BEL:"BRUSSELS AIRLINES",
+
     TRA:"TRANSAVIA",
+
     EXS:"JET2",
+
     TUI:"TUI",
+
     ETD:"ETIHAD AIRWAYS",
+
     ELY:"EL AL",
+
     MSR:"EGYPTAIR",
+
     CFG:"CONDOR"
 
 };
 
 
 /* =========================================================
-   LOGO MAP
-
-   If a logo cannot load,
-   we automatically show
-   the airline code instead.
+   LOGO FALLBACK
 ========================================================= */
 
 const logoSlugs={
 
     RYR:"ryanair",
+
     UAE:"emirates",
+
     AUA:"austrianairlines",
+
     DLH:"lufthansa",
+
     KLM:"klm",
+
     BAW:"britishairways",
+
     EZY:"easyjet",
+
     WZZ:"wizzair",
+
     QTR:"qatarairways",
+
     THY:"turkishairlines",
+
     AFR:"airfrance",
+
     SWR:"swiss",
+
     LOT:"lotpolishairlines",
+
     SAS:"sas",
+
     FIN:"finnair",
+
     IBE:"iberia",
+
     TAP:"tapairportugal",
+
     EIN:"aerlingus",
+
     EWG:"eurowings",
+
     AEE:"aegeanairlines",
+
     CFG:"condor"
 
 };
 
 
-function airlinePrefix(ac){
-
-    const callsign=
-        (ac.flight||"")
-        .trim()
-        .toUpperCase();
-
-
-    if(callsign.length<3)
-        return "";
-
-
-    return callsign.substring(0,3);
-}
-
-
-function updateLogo(ac){
-
-    const prefix=
-        airlinePrefix(ac);
-
-
-    const img=
-        document.getElementById(
-            "airlineLogo"
-        );
-
-
-    const fallback=
-        document.getElementById(
-            "logoFallback"
-        );
-
-
-    img.style.display="none";
-    fallback.style.display="none";
-
-
-    if(!prefix)
-        return;
-
-
-    const slug=
-        logoSlugs[prefix];
-
-
-    if(!slug){
-
-        fallback.textContent=
-            prefix;
-
-        fallback.style.display=
-            "flex";
-
-        return;
-    }
-
-
-    img.onload=function(){
-
-        fallback.style.display=
-            "none";
-
-        img.style.display=
-            "block";
-    };
-
-
-    img.onerror=function(){
-
-        img.style.display=
-            "none";
-
-        fallback.textContent=
-            prefix;
-
-        fallback.style.display=
-            "flex";
-    };
-
-
-    img.src=
-        "https://cdn.simpleicons.org/"
-        +
-        slug
-        +
-        "/ffffff";
-}
-
-
 /* =========================================================
-   PRAGUE AIRPORT / RUNWAYS
+   RUNWAYS
 ========================================================= */
 
-const PRG={
-    lat:50.1008,
-    lon:14.2600
-};
-
-
-const runwayEnds=[
-
-    {
-        name:"06",
-        heading:60,
-        lat:50.1018361,
-        lon:14.2263000
-    },
-
-    {
-        name:"24",
-        heading:240,
-        lat:50.1159500,
-        lon:14.2733667
-    },
-
-    {
-        name:"12",
-        heading:122,
-        lat:50.1080111,
-        lon:14.2453667
-    },
-
-    {
-        name:"30",
-        heading:302,
-        lat:50.0904667,
-        lon:14.2816722
-    }
-
-];
+const runwayEnds=
+    AIRPORT.runwayEnds;
 
 
 const physicalRunways=[
 
     {
-        name:"06/24",
-        a:runwayEnds[0],
-        b:runwayEnds[1]
+        name:
+            runwayEnds[0].name+
+            "/"+
+            runwayEnds[1].name,
+
+        a:
+            runwayEnds[0],
+
+        b:
+            runwayEnds[1]
     },
 
     {
-        name:"12/30",
-        a:runwayEnds[2],
-        b:runwayEnds[3]
+        name:
+            runwayEnds[2].name+
+            "/"+
+            runwayEnds[3].name,
+
+        a:
+            runwayEnds[2],
+
+        b:
+            runwayEnds[3]
     }
 
 ];
 
 
 /* =========================================================
-   FILTER HELICOPTERS / SMALL GA
+   FILTERS
 ========================================================= */
 
-const helicopterTypes=new Set([
+const helicopterTypes=
+new Set([
 
     "A109","A119","A139","A149","A169","A189",
+
     "AS32","AS50","AS55","AS65",
+
     "B06","B105","B212","B222","B412","B429",
+
     "EC20","EC25","EC30","EC35","EC45","EC55",
+
     "H125","H130","H135","H145","H155","H160",
+
     "R22","R44","R66",
+
     "S55","S58","S61","S64","S76","S92"
 
 ]);
@@ -681,10 +1259,12 @@ const helicopterTypes=new Set([
 const smallAircraftPrefixes=[
 
     "C15","C17","C18","C19","C20","C21",
+
     "C22","C23","C24","C25",
 
-    "PA18","PA20","PA22","PA24","PA28","PA32",
-    "PA34","PA38","PA44",
+    "PA18","PA20","PA22","PA24",
+
+    "PA28","PA32","PA34","PA38","PA44",
 
     "DA20","DA40","DA42",
 
@@ -699,10 +1279,41 @@ const smallAircraftPrefixes=[
 ];
 
 
+const groundCallsignPrefixes=[
+
+    "FOLLOW",
+
+    "POZAR",
+
+    "TXLU",
+
+    "UDRZBA",
+
+    "TWR",
+
+    "GND",
+
+    "EMER"
+
+];
+
+
 function unwantedAircraft(ac){
 
     const type=
         (ac.t||"")
+        .trim()
+        .toUpperCase();
+
+
+    const reg=
+        (ac.r||"")
+        .trim()
+        .toUpperCase();
+
+
+    const flight=
+        (ac.flight||"")
         .trim()
         .toUpperCase();
 
@@ -713,6 +1324,24 @@ function unwantedAircraft(ac){
         .toUpperCase();
 
 
+    /*
+       ADS-B surface vehicle categories.
+    */
+
+    if(
+        category==="C0"
+        ||
+        category==="C1"
+        ||
+        category==="C2"
+    )
+        return true;
+
+
+    /*
+       Helicopters.
+    */
+
     if(category==="A7")
         return true;
 
@@ -721,9 +1350,50 @@ function unwantedAircraft(ac){
         return true;
 
 
-    for(const prefix of smallAircraftPrefixes){
+    /*
+       Known airport vehicle labels.
+    */
 
-        if(type.startsWith(prefix))
+    if(
+        type==="TWR"
+        ||
+        type==="GND"
+        ||
+        type==="EMER"
+        ||
+        reg==="TWR"
+        ||
+        reg==="GND"
+        ||
+        reg==="EMER"
+    )
+        return true;
+
+
+    for(
+        const prefix
+        of groundCallsignPrefixes
+    ){
+
+        if(
+            flight.startsWith(prefix)
+        )
+            return true;
+    }
+
+
+    /*
+       Small general aviation.
+    */
+
+    for(
+        const prefix
+        of smallAircraftPrefixes
+    ){
+
+        if(
+            type.startsWith(prefix)
+        )
             return true;
     }
 
@@ -733,7 +1403,7 @@ function unwantedAircraft(ac){
 
 
 /* =========================================================
-   MEMORY
+   TRACKING MEMORY
 ========================================================= */
 
 const aircraftMemory=
@@ -746,7 +1416,159 @@ const landedBlacklist=
 
 let activeDeparture=null;
 
+
 let landedDisplay=null;
+
+
+/* =========================================================
+   POPUP MEMORY
+========================================================= */
+
+let popupTimer=null;
+
+
+let currentPopupKey=null;
+
+
+let currentPopupAircraft=null;
+
+
+const photoCache=
+    new Map();
+
+
+/* =========================================================
+   TICKER MEMORY
+========================================================= */
+
+let tickerEvents=[];
+
+
+const tickerKeys=
+    new Set();
+
+
+function addTicker(
+    key,
+    text,
+    level="silver"
+){
+
+    if(tickerKeys.has(key))
+        return;
+
+
+    tickerKeys.add(key);
+
+
+    tickerEvents.unshift({
+
+        key,
+
+        text,
+
+        level,
+
+        time:
+            Date.now()
+
+    });
+
+
+    if(tickerEvents.length>10){
+
+        tickerEvents=
+            tickerEvents.slice(0,10);
+    }
+
+
+    rebuildTicker();
+}
+
+
+function rebuildTicker(){
+
+    const track=
+        document
+        .getElementById(
+            "tickerTrack"
+        );
+
+
+    const defaults=[
+
+        {
+            text:
+                AIRPORT.code+
+                " LIVE AIR TRAFFIC",
+
+            level:"silver"
+        },
+
+        {
+            text:
+                "ADS-B TRACKING ACTIVE",
+
+            level:"silver"
+        }
+
+    ];
+
+
+    const events=
+        tickerEvents.length
+        ?
+        tickerEvents
+        :
+        defaults;
+
+
+    track.innerHTML=
+        events
+
+        .map(item=>
+
+            '<span class="ticker-item '+
+            item.level+
+            '">'+
+            item.text+
+            '</span>'
+
+        )
+
+        .join("")
+
+        +
+
+        events
+
+        .map(item=>
+
+            '<span class="ticker-item '+
+            item.level+
+            '">'+
+            item.text+
+            '</span>'
+
+        )
+
+        .join("");
+
+
+    /*
+       Restart animation only when
+       ticker information changes.
+    */
+
+    track.style.animation="none";
+
+    void track.offsetWidth;
+
+    track.style.animation="";
+}
+
+
+rebuildTicker();
 
 
 /* =========================================================
@@ -756,10 +1578,62 @@ let landedDisplay=null;
 function aircraftId(ac){
 
     return (
-        ac.hex ||
-        ac.r ||
-        (ac.flight||"").trim() ||
+
+        ac.hex
+
+        ||
+
+        ac.r
+
+        ||
+
+        (ac.flight||"").trim()
+
+        ||
+
         null
+
+    );
+}
+
+
+function airlinePrefix(ac){
+
+    const flight=
+        (ac.flight||"")
+        .trim()
+        .toUpperCase();
+
+
+    return flight.length>=3
+        ?
+        flight.substring(0,3)
+        :
+        "";
+}
+
+
+function airlineName(ac){
+
+    const prefix=
+        airlinePrefix(ac);
+
+
+    return airlines[prefix]
+        ||
+        "";
+}
+
+
+function callsign(ac){
+
+    return (
+        (ac.flight||"")
+        .trim()
+        ||
+        ac.r
+        ||
+        "AIRCRAFT"
     );
 }
 
@@ -767,8 +1641,13 @@ function aircraftId(ac){
 function onGround(ac){
 
     return (
-        ac.alt_baro==="ground" ||
+
+        ac.alt_baro==="ground"
+
+        ||
+
         ac.alt_geom==="ground"
+
     );
 }
 
@@ -780,17 +1659,27 @@ function altitude(ac){
 
 
     let value=
-        Number(ac.alt_baro);
+        Number(
+            ac.alt_baro
+        );
 
 
-    if(!Number.isFinite(value))
+    if(
+        !Number.isFinite(value)
+    ){
+
         value=
-            Number(ac.alt_geom);
+            Number(
+                ac.alt_geom
+            );
+    }
 
 
     return Number.isFinite(value)
-        ? value
-        : null;
+        ?
+        value
+        :
+        null;
 }
 
 
@@ -801,45 +1690,69 @@ function groundSpeed(ac){
 
 
     return Number.isFinite(value)
-        ? value
-        : 0;
+        ?
+        value
+        :
+        0;
 }
 
 
 function verticalRate(ac){
 
     let value=
-        Number(ac.baro_rate);
+        Number(
+            ac.baro_rate
+        );
 
 
-    if(!Number.isFinite(value))
+    if(
+        !Number.isFinite(value)
+    ){
+
         value=
-            Number(ac.geom_rate);
+            Number(
+                ac.geom_rate
+            );
+    }
 
 
     return Number.isFinite(value)
-        ? value
-        : 0;
+        ?
+        value
+        :
+        0;
 }
 
 
 function positionAge(ac){
 
     const value=
-        Number(ac.seen_pos);
+        Number(
+            ac.seen_pos
+        );
 
 
     return Number.isFinite(value)
-        ? value
-        : 999;
+        ?
+        value
+        :
+        999;
 }
 
 
 function freshPosition(ac){
 
-    return positionAge(ac)<=5;
+    return (
+        positionAge(ac)
+        <=
+        5
+    );
 }
 
+
+/* =========================================================
+   DISTANCE
+========================================================= */
 
 function distanceKm(
     lat1,
@@ -852,40 +1765,55 @@ function distanceKm(
 
 
     const dLat=
-        (lat2-lat1)*
+        (
+            lat2-lat1
+        )
+        *
         Math.PI/180;
 
 
     const dLon=
-        (lon2-lon1)*
+        (
+            lon2-lon1
+        )
+        *
         Math.PI/180;
 
 
     const a=
 
-        Math.sin(dLat/2)**2
+        Math.sin(
+            dLat/2
+        )**2
 
         +
 
         Math.cos(
-            lat1*Math.PI/180
+            lat1*
+            Math.PI/180
         )
 
         *
 
         Math.cos(
-            lat2*Math.PI/180
+            lat2*
+            Math.PI/180
         )
 
         *
 
-        Math.sin(dLon/2)**2;
+        Math.sin(
+            dLon/2
+        )**2;
 
 
     return R*2*
         Math.atan2(
+
             Math.sqrt(a),
+
             Math.sqrt(1-a)
+
         );
 }
 
@@ -901,18 +1829,28 @@ function distanceToRunway(
 ){
 
     const ref=
+
         (
-            lat+
-            runway.a.lat+
+            lat
+            +
+            runway.a.lat
+            +
             runway.b.lat
-        )/3;
+        )
+        /
+        3;
 
 
-    const ky=111.32;
+    const ky=
+        111.32;
 
 
     const kx=
-        111.32*
+
+        111.32
+
+        *
+
         Math.cos(
             ref*
             Math.PI/180
@@ -922,12 +1860,14 @@ function distanceToRunway(
     const px=
         lon*kx;
 
+
     const py=
         lat*ky;
 
 
     const ax=
         runway.a.lon*kx;
+
 
     const ay=
         runway.a.lat*ky;
@@ -936,12 +1876,14 @@ function distanceToRunway(
     const bx=
         runway.b.lon*kx;
 
+
     const by=
         runway.b.lat*ky;
 
 
     const vx=
         bx-ax;
+
 
     const vy=
         by-ay;
@@ -950,30 +1892,41 @@ function distanceToRunway(
     const wx=
         px-ax;
 
+
     const wy=
         py-ay;
 
 
     const lengthSquared=
-        vx*vx+
+
+        vx*vx
+        +
         vy*vy;
 
 
     let t=
+
         (
-            wx*vx+
+            wx*vx
+            +
             wy*vy
-        )/
+        )
+
+        /
+
         lengthSquared;
 
 
     t=
         Math.max(
+
             0,
+
             Math.min(
                 1,
                 t
             )
+
         );
 
 
@@ -986,8 +1939,13 @@ function distanceToRunway(
 
 
     return Math.sqrt(
-        (px-cx)**2+
+
+        (px-cx)**2
+
+        +
+
         (py-cy)**2
+
     );
 }
 
@@ -997,21 +1955,27 @@ function nearestRunwayDistance(ac){
     const lat=
         Number(ac.lat);
 
+
     const lon=
         Number(ac.lon);
 
 
     if(
-        !Number.isFinite(lat) ||
+        !Number.isFinite(lat)
+        ||
         !Number.isFinite(lon)
     )
         return 999;
 
 
-    let best=999;
+    let best=
+        999;
 
 
-    for(const runway of physicalRunways){
+    for(
+        const runway
+        of physicalRunways
+    ){
 
         const d=
             distanceToRunway(
@@ -1033,9 +1997,13 @@ function nearestRunwayDistance(ac){
 function nearRunway(ac){
 
     return (
+
         nearestRunwayDistance(ac)
+
         <=
+
         0.22
+
     );
 }
 
@@ -1045,171 +2013,85 @@ function nearestThreshold(ac){
     const lat=
         Number(ac.lat);
 
+
     const lon=
         Number(ac.lon);
 
 
     if(
-        !Number.isFinite(lat) ||
+        !Number.isFinite(lat)
+        ||
         !Number.isFinite(lon)
     )
         return null;
 
 
     let best=null;
-    let bestDistance=999;
 
 
-    for(const end of runwayEnds){
+    let bestDistance=
+        999;
+
+
+    for(
+        const end
+        of runwayEnds
+    ){
 
         const d=
             distanceKm(
+
                 lat,
+
                 lon,
+
                 end.lat,
+
                 end.lon
+
             );
 
 
-        if(d<bestDistance){
+        if(
+            d<
+            bestDistance
+        ){
 
             bestDistance=d;
+
             best=end;
         }
     }
 
 
     return {
-        runway:best,
-        distance:bestDistance
+
+        runway:
+            best,
+
+        distance:
+            bestDistance
+
     };
 }
 
 
 /* =========================================================
-   DISPLAY
-========================================================= */
-
-function airlineName(callsign){
-
-    if(!callsign)
-        return "";
-
-
-    return airlines[
-        callsign
-        .trim()
-        .toUpperCase()
-        .substring(0,3)
-    ] || "";
-}
-
-
-function headline(ac){
-
-    const callsign=
-        (ac.flight||"")
-        .trim()
-        ||
-        "AIRCRAFT";
-
-
-    const company=
-        airlineName(callsign);
-
-
-    return company
-
-        ? company+
-          "  •  "+
-          callsign
-
-        : callsign;
-}
-
-
-function aircraftDetails(ac){
-
-    return [
-
-        ac.t||"",
-        ac.r||""
-
-    ]
-    .filter(Boolean)
-    .join("  •  ");
-}
-
-
-function showState(ac,state){
-
-    document
-    .querySelector(".airline")
-    .textContent=
-        headline(ac);
-
-
-    document
-    .querySelector(".details")
-    .textContent=
-        aircraftDetails(ac);
-
-
-    document
-    .querySelector(".status")
-    .textContent=
-        state;
-
-
-    updateLogo(ac);
-}
-
-
-function clearDisplay(){
-
-    document
-    .querySelector(".airline")
-    .textContent="";
-
-
-    document
-    .querySelector(".details")
-    .textContent="";
-
-
-    document
-    .querySelector(".status")
-    .textContent="";
-
-
-    document
-    .getElementById(
-        "airlineLogo"
-    )
-    .style.display=
-        "none";
-
-
-    document
-    .getElementById(
-        "logoFallback"
-    )
-    .style.display=
-        "none";
-}
-
-
-/* =========================================================
-   MEMORY HELPERS
+   MEMORY
 ========================================================= */
 
 function getMemory(id){
 
-    if(!aircraftMemory.has(id)){
+    if(
+        !aircraftMemory.has(id)
+    ){
 
         aircraftMemory.set(
+
             id,
+
             {
+
                 samples:[],
 
                 arrivalCandidate:false,
@@ -1220,8 +2102,11 @@ function getMemory(id){
 
                 lastNearRunwayGround:0,
 
-                lastSeen:Date.now()
+                lastSeen:
+                    Date.now()
+
             }
+
         );
     }
 
@@ -1247,6 +2132,7 @@ function addSample(ac){
     const lat=
         Number(ac.lat);
 
+
     const lon=
         Number(ac.lon);
 
@@ -1260,10 +2146,15 @@ function addSample(ac){
         ?
 
         distanceKm(
+
             lat,
+
             lon,
-            PRG.lat,
-            PRG.lon
+
+            AIRPORT.lat,
+
+            AIRPORT.lon
+
         )
 
         :
@@ -1298,27 +2189,43 @@ function addSample(ac){
         airportDistance,
 
         thresholdDistance:
+
             threshold
-            ? threshold.distance
-            : 999,
+
+            ?
+
+            threshold.distance
+
+            :
+
+            999,
 
         nearRunway:
             nearRunway(ac)
+
     };
 
 
-    memory.samples.push(sample);
+    memory.samples.push(
+        sample
+    );
 
 
     const cutoff=
-        Date.now()-
+
+        Date.now()
+
+        -
+
         180000;
 
 
     memory.samples=
+
         memory.samples
+
         .filter(
-            s=>
+            s =>
             s.time>=cutoff
         );
 
@@ -1337,6 +2244,7 @@ function addSample(ac){
 
         memory.wasNearRunwayGround=
             true;
+
 
         memory.lastNearRunwayGround=
             Date.now();
@@ -1370,7 +2278,9 @@ function updateArrivalCandidate(ac){
         memory.samples;
 
 
-    if(samples.length<2)
+    if(
+        samples.length<2
+    )
         return;
 
 
@@ -1380,11 +2290,15 @@ function updateArrivalCandidate(ac){
         ];
 
 
-    if(latest.vertical>900)
+    if(
+        latest.vertical>900
+    )
         return;
 
 
-    if(latest.airportDistance>20)
+    if(
+        latest.airportDistance>20
+    )
         return;
 
 
@@ -1410,21 +2324,33 @@ function updateArrivalCandidate(ac){
 
 
     const recent=
+
         samples
+
         .filter(
+
             s=>
+
             !s.ground
+
             &&
+
             s.positionAge<=5
+
         )
+
         .slice(-6);
 
 
-    if(recent.length<2)
+    if(
+        recent.length<2
+    )
         return;
 
 
     let closerCount=0;
+
+
     let descendingCount=0;
 
 
@@ -1435,23 +2361,47 @@ function updateArrivalCandidate(ac){
     ){
 
         if(
-            recent[i].airportDistance
+
+            recent[i]
+            .airportDistance
+
             <
-            recent[i-1].airportDistance
+
+            recent[i-1]
+            .airportDistance
+
             +
+
             0.10
+
         )
             closerCount++;
 
 
         if(
-            recent[i].altitude!==null
+
+            recent[i]
+            .altitude!==null
+
             &&
-            recent[i-1].altitude!==null
+
+            recent[i-1]
+            .altitude!==null
+
             &&
-            recent[i].altitude
+
+            recent[i]
+            .altitude
+
             <=
-            recent[i-1].altitude+75
+
+            recent[i-1]
+            .altitude
+
+            +
+
+            75
+
         )
             descendingCount++;
     }
@@ -1463,7 +2413,9 @@ function updateArrivalCandidate(ac){
         descendingCount>=1
     ){
 
-        memory.arrivalCandidate=true;
+        memory.arrivalCandidate=
+            true;
+
 
         memory.arrivalLastSeen=
             Date.now();
@@ -1486,9 +2438,14 @@ function updateArrivalCandidate(ac){
    TOUCHDOWN
 ========================================================= */
 
-function detectTouchdown(aircraft){
+function detectTouchdown(
+    aircraft
+){
 
-    for(const ac of aircraft){
+    for(
+        const ac
+        of aircraft
+    ){
 
         const id=
             aircraftId(ac);
@@ -1533,7 +2490,7 @@ function detectTouchdown(aircraft){
 
 
 /* =========================================================
-   DEPARTURE ACCELERATION
+   TAKEOFF ROLL
 ========================================================= */
 
 function departureAcceleration(ac){
@@ -1573,31 +2530,48 @@ function departureAcceleration(ac){
 
 
     const freshGround=
+
         memory.samples
 
         .filter(
+
             s=>
+
             s.ground
+
             &&
+
             s.positionAge<=5
+
             &&
+
             s.nearRunway
+
         )
 
         .slice(-8);
 
 
-    if(freshGround.length<2)
+    if(
+        freshGround.length<2
+    )
         return false;
 
 
     const latest=
+
         freshGround[
             freshGround.length-1
         ];
 
 
-    if(latest.speed>=40)
+    /*
+       Strong runway acceleration.
+    */
+
+    if(
+        latest.speed>=40
+    )
         return true;
 
 
@@ -1606,7 +2580,11 @@ function departureAcceleration(ac){
 
 
     const gain=
-        latest.speed-
+
+        latest.speed
+
+        -
+
         first.speed;
 
 
@@ -1620,20 +2598,34 @@ function departureAcceleration(ac){
     ){
 
         if(
+
             freshGround[i].speed
+
             >
-            freshGround[i-1].speed+1
+
+            freshGround[i-1].speed
+
+            +
+
+            1
+
         )
             increases++;
     }
 
 
     if(
+
         latest.speed>=22
+
         &&
+
         gain>=8
+
         &&
+
         increases>=2
+
     )
         return true;
 
@@ -1681,6 +2673,7 @@ function airborneDeparture(ac){
     const lat=
         Number(ac.lat);
 
+
     const lon=
         Number(ac.lon);
 
@@ -1695,10 +2688,15 @@ function airborneDeparture(ac){
 
     const d=
         distanceKm(
+
             lat,
+
             lon,
-            PRG.lat,
-            PRG.lon
+
+            AIRPORT.lat,
+
+            AIRPORT.lon
+
         );
 
 
@@ -1712,42 +2710,57 @@ function airborneDeparture(ac){
         return false;
 
 
-    if(climb<500)
+    if(
+        climb<500
+    )
         return false;
 
 
     if(
+
         memory.wasNearRunwayGround
+
         &&
-        Date.now()-
+
+        Date.now()
+        -
         memory.lastNearRunwayGround
+
         <
+
         120000
+
     )
         return true;
 
 
     const recentGround=
+
         memory.samples
+
         .slice(-12)
+
         .some(
+
             s=>
+
             s.ground
+
             &&
-            Date.now()-s.time<120000
+
+            Date.now()-s.time
+            <
+            120000
+
         );
 
 
-    if(recentGround)
-        return true;
-
-
-    return false;
+    return recentGround;
 }
 
 
 /* =========================================================
-   APPROACHING DISPLAY
+   DISPLAY ARRIVAL CANDIDATE
 ========================================================= */
 
 function displayArrivalCandidate(ac){
@@ -1768,7 +2781,9 @@ function displayArrivalCandidate(ac){
         getMemory(id);
 
 
-    if(!memory.arrivalCandidate)
+    if(
+        !memory.arrivalCandidate
+    )
         return null;
 
 
@@ -1780,7 +2795,14 @@ function displayArrivalCandidate(ac){
         return null;
 
 
-    if(nearest.distance>3)
+    /*
+       Display final approach only
+       within 3 km.
+    */
+
+    if(
+        nearest.distance>3
+    )
         return null;
 
 
@@ -1791,10 +2813,753 @@ function displayArrivalCandidate(ac){
 
 
     return {
+
         ac,
+
         distance:
             nearest.distance
+
     };
+}
+
+
+/* =========================================================
+   PHOTO / LOGO DISPLAY
+========================================================= */
+
+function resetPopupImage(){
+
+    const photo=
+        document
+        .getElementById(
+            "popupPhoto"
+        );
+
+
+    const logo=
+        document
+        .getElementById(
+            "popupLogo"
+        );
+
+
+    const logoImage=
+        document
+        .getElementById(
+            "popupLogoImage"
+        );
+
+
+    const logoCode=
+        document
+        .getElementById(
+            "popupLogoCode"
+        );
+
+
+    const credit=
+        document
+        .getElementById(
+            "photoCredit"
+        );
+
+
+    photo.classList.remove(
+        "show"
+    );
+
+
+    photo.removeAttribute(
+        "src"
+    );
+
+
+    credit.style.display=
+        "none";
+
+
+    credit.textContent="";
+
+
+    logo.style.display=
+        "flex";
+
+
+    logoImage.style.display=
+        "none";
+
+
+    logoImage.removeAttribute(
+        "src"
+    );
+
+
+    logoCode.textContent="";
+}
+
+
+function showLogoFallback(ac){
+
+    resetPopupImage();
+
+
+    const prefix=
+        airlinePrefix(ac);
+
+
+    const slug=
+        logoSlugs[prefix];
+
+
+    const logoImage=
+        document
+        .getElementById(
+            "popupLogoImage"
+        );
+
+
+    const logoCode=
+        document
+        .getElementById(
+            "popupLogoCode"
+        );
+
+
+    logoCode.textContent=
+        prefix || "AIR";
+
+
+    if(slug){
+
+        logoImage.onload=
+            function(){
+
+                logoImage.style.display=
+                    "block";
+
+            };
+
+
+        logoImage.onerror=
+            function(){
+
+                logoImage.style.display=
+                    "none";
+
+            };
+
+
+        logoImage.src=
+
+            "https://cdn.simpleicons.org/"
+
+            +
+
+            slug
+
+            +
+
+            "/ffffff";
+    }
+}
+
+
+async function loadAircraftPhoto(
+    ac,
+    popupKey
+){
+
+    const hex=
+        (ac.hex||"")
+        .trim()
+        .toUpperCase();
+
+
+    if(!hex){
+
+        showLogoFallback(ac);
+
+        return;
+    }
+
+
+    /*
+       Always show fallback immediately
+       while photo loads.
+    */
+
+    showLogoFallback(ac);
+
+
+    if(
+        photoCache.has(hex)
+    ){
+
+        const cached=
+            photoCache.get(hex);
+
+
+        if(cached)
+            applyPhoto(
+                cached,
+                popupKey
+            );
+
+
+        return;
+    }
+
+
+    try{
+
+        const response=
+            await fetch(
+
+                PHOTO_API
+
+                +
+
+                "?hex="
+
+                +
+
+                encodeURIComponent(hex),
+
+                {
+                    cache:"force-cache"
+                }
+
+            );
+
+
+        if(!response.ok){
+
+            photoCache.set(
+                hex,
+                null
+            );
+
+            return;
+        }
+
+
+        const data=
+            await response.json();
+
+
+        if(
+
+            data.status===200
+
+            &&
+
+            data.data
+
+            &&
+
+            data.data.length
+
+            &&
+
+            data.data[0].image
+
+        ){
+
+            const photoData=
+                data.data[0];
+
+
+            photoCache.set(
+                hex,
+                photoData
+            );
+
+
+            applyPhoto(
+                photoData,
+                popupKey
+            );
+
+        }
+
+        else{
+
+            photoCache.set(
+                hex,
+                null
+            );
+        }
+
+    }
+
+    catch(error){
+
+        console.log(
+            "Photo lookup failed",
+            error
+        );
+
+    }
+}
+
+
+function applyPhoto(
+    photoData,
+    popupKey
+){
+
+    /*
+       Aircraft may have changed
+       while network request was running.
+    */
+
+    if(
+        currentPopupKey!==popupKey
+    )
+        return;
+
+
+    const photo=
+        document
+        .getElementById(
+            "popupPhoto"
+        );
+
+
+    const logo=
+        document
+        .getElementById(
+            "popupLogo"
+        );
+
+
+    const credit=
+        document
+        .getElementById(
+            "photoCredit"
+        );
+
+
+    photo.onload=
+        function(){
+
+            if(
+                currentPopupKey
+                !==
+                popupKey
+            )
+                return;
+
+
+            logo.style.display=
+                "none";
+
+
+            photo.classList.add(
+                "show"
+            );
+
+
+            if(
+                photoData.photographer
+            ){
+
+                credit.textContent=
+
+                    "Photo: "
+
+                    +
+
+                    photoData.photographer
+
+                    +
+
+                    " / Airport-Data.com";
+
+
+                credit.style.display=
+                    "block";
+            }
+
+        };
+
+
+    photo.src=
+        photoData.image;
+}
+
+
+/* =========================================================
+   POPUP
+========================================================= */
+
+function popupFlightText(ac){
+
+    const company=
+        airlineName(ac);
+
+
+    const call=
+        callsign(ac);
+
+
+    if(company){
+
+        return (
+            company
+            +
+            " • "
+            +
+            call
+        );
+    }
+
+
+    return call;
+}
+
+
+function popupDetailText(ac){
+
+    const parts=[];
+
+
+    if(ac.desc){
+
+        parts.push(
+            ac.desc
+        );
+
+    }
+
+    else if(ac.t){
+
+        parts.push(
+            ac.t
+        );
+    }
+
+
+    if(ac.r){
+
+        parts.push(
+            ac.r
+        );
+    }
+
+
+    return parts.join(
+        " • "
+    );
+}
+
+
+function showPopup(
+    ac,
+    direction,
+    alert,
+    popupKey,
+    duration=22000
+){
+
+    if(
+        currentPopupKey===popupKey
+    )
+        return;
+
+
+    currentPopupKey=
+        popupKey;
+
+
+    currentPopupAircraft=
+        aircraftId(ac);
+
+
+    const popup=
+        document
+        .getElementById(
+            "aircraftPopup"
+        );
+
+
+    const directionEl=
+        document
+        .getElementById(
+            "popupDirection"
+        );
+
+
+    const alertEl=
+        document
+        .getElementById(
+            "popupAlert"
+        );
+
+
+    const flightEl=
+        document
+        .getElementById(
+            "popupFlight"
+        );
+
+
+    const detailsEl=
+        document
+        .getElementById(
+            "popupDetails"
+        );
+
+
+    popup.className=
+        "aircraft-popup";
+
+
+    if(direction==="DEPARTURE"){
+
+        popup.classList.add(
+            "departure"
+        );
+
+
+        directionEl.className=
+            "popup-direction departure";
+
+    }
+
+    else if(alert==="LANDED"){
+
+        popup.classList.add(
+            "landed"
+        );
+
+
+        directionEl.className=
+            "popup-direction";
+
+    }
+
+    else{
+
+        popup.classList.add(
+            "arrival"
+        );
+
+
+        directionEl.className=
+            "popup-direction";
+    }
+
+
+    directionEl.textContent=
+        direction;
+
+
+    alertEl.textContent=
+        alert;
+
+
+    flightEl.textContent=
+        popupFlightText(ac);
+
+
+    detailsEl.textContent=
+        popupDetailText(ac);
+
+
+    loadAircraftPhoto(
+        ac,
+        popupKey
+    );
+
+
+    /*
+       Restart emerge animation.
+    */
+
+    popup.classList.remove(
+        "show"
+    );
+
+
+    void popup.offsetWidth;
+
+
+    popup.classList.add(
+        "show"
+    );
+
+
+    if(popupTimer){
+
+        clearTimeout(
+            popupTimer
+        );
+    }
+
+
+    popupTimer=
+        setTimeout(
+            hidePopup,
+            duration
+        );
+}
+
+
+function hidePopup(){
+
+    const popup=
+        document
+        .getElementById(
+            "aircraftPopup"
+        );
+
+
+    popup.classList.remove(
+        "show"
+    );
+
+
+    popupTimer=null;
+}
+
+
+/* =========================================================
+   EVENT PRESENTATION
+========================================================= */
+
+function announceArrival(
+    ac,
+    distance
+){
+
+    const id=
+        aircraftId(ac);
+
+
+    const key=
+        "ARRIVAL:"+
+        id;
+
+
+    showPopup(
+
+        ac,
+
+        "ARRIVAL",
+
+        "LANDING",
+
+        key,
+
+        22000
+
+    );
+
+
+    addTicker(
+
+        key,
+
+        "ARRIVAL • "
+        +
+        popupFlightText(ac)
+        +
+        " • FINAL APPROACH",
+
+        distance<=1.5
+        ?
+        "red"
+        :
+        "yellow"
+
+    );
+}
+
+
+function announceLanded(ac){
+
+    const id=
+        aircraftId(ac);
+
+
+    const key=
+        "LANDED:"+
+        id;
+
+
+    showPopup(
+
+        ac,
+
+        "ARRIVAL",
+
+        "LANDED",
+
+        key,
+
+        14000
+
+    );
+
+
+    addTicker(
+
+        key,
+
+        "LANDED • "
+        +
+        popupFlightText(ac)
+        +
+        " • "
+        +
+        AIRPORT.code,
+
+        "silver"
+
+    );
+}
+
+
+function announceDeparture(ac){
+
+    const id=
+        aircraftId(ac);
+
+
+    const key=
+        "DEPARTURE:"+
+        id;
+
+
+    showPopup(
+
+        ac,
+
+        "DEPARTURE",
+
+        "TAKE OFF",
+
+        key,
+
+        20000
+
+    );
+
+
+    addTicker(
+
+        key,
+
+        "DEPARTURE • "
+        +
+        popupFlightText(ac)
+        +
+        " • TAKE OFF",
+
+        "yellow"
+
+    );
 }
 
 
@@ -1813,8 +3578,12 @@ function cleanup(){
         of landedBlacklist
     ){
 
-        if(now>=expiry)
-            landedBlacklist.delete(id);
+        if(now>=expiry){
+
+            landedBlacklist.delete(
+                id
+            );
+        }
     }
 
 
@@ -1824,32 +3593,65 @@ function cleanup(){
     ){
 
         if(
+
             memory.arrivalCandidate
+
             &&
-            now-
+
+            now
+            -
             memory.arrivalLastSeen
+
             >
+
             8*60*1000
+
         ){
 
-            memory.arrivalCandidate=false;
+            memory.arrivalCandidate=
+                false;
         }
 
 
         if(
-            now-memory.lastSeen
+
+            now
+            -
+            memory.lastSeen
+
             >
+
             15*60*1000
+
         ){
 
-            aircraftMemory.delete(id);
+            aircraftMemory.delete(
+                id
+            );
         }
     }
+
+
+    /*
+       Remove old ticker lock keys
+       after 40 minutes so repeated
+       flights later aren't blocked.
+    */
+
+    tickerEvents=
+        tickerEvents
+
+        .filter(
+            item=>
+            now-item.time
+            <
+            40*60*1000
+        );
 }
 
 
 /* =========================================================
-   MAIN
+   MAIN TRACKING LOOP
 ========================================================= */
 
 async function update(){
@@ -1861,20 +3663,32 @@ async function update(){
 
         const response=
             await fetch(
-                API+
-                "?t="+
+
+                AIRCRAFT_API
+
+                +
+
+                "?t="
+
+                +
+
                 Date.now(),
+
                 {
                     cache:"no-store"
                 }
+
             );
 
 
-        if(!response.ok)
+        if(!response.ok){
+
             throw new Error(
-                "HTTP "+
+                "HTTP "
+                +
                 response.status
             );
+        }
 
 
         const data=
@@ -1882,30 +3696,42 @@ async function update(){
 
 
         const aircraft=
+
             (data.ac||[])
 
             .filter(
-                ac =>
+
+                ac=>
+
                 Number.isFinite(
                     Number(ac.lat)
                 )
+
                 &&
+
                 Number.isFinite(
                     Number(ac.lon)
                 )
+
             )
 
             .filter(
-                ac =>
+
+                ac=>
+
                 !unwantedAircraft(ac)
+
             );
 
 
         /*
-           UPDATE MEMORY
+           Update aircraft memory.
         */
 
-        for(const ac of aircraft){
+        for(
+            const ac
+            of aircraft
+        ){
 
             addSample(ac);
 
@@ -1913,11 +3739,9 @@ async function update(){
         }
 
 
-        /*
-           =====================================
-           1 — TOUCHDOWN
-           =====================================
-        */
+        /* ==================================================
+           TOUCHDOWN — HIGHEST PRIORITY
+        ================================================== */
 
         const touchdown=
             detectTouchdown(
@@ -1934,9 +3758,13 @@ async function update(){
 
 
             landedBlacklist.set(
+
                 id,
-                Date.now()+
+
+                Date.now()
+                +
                 5*60*1000
+
             );
 
 
@@ -1950,21 +3778,27 @@ async function update(){
 
             if(
                 activeDeparture===id
-            )
+            ){
+
                 activeDeparture=null;
+            }
 
 
             landedDisplay={
-                ac:touchdown,
+
+                ac:
+                    touchdown,
+
                 until:
-                    Date.now()+
+                    Date.now()
+                    +
                     12000
+
             };
 
 
-            showState(
-                touchdown,
-                "LANDED"
+            announceLanded(
+                touchdown
             );
 
 
@@ -1972,16 +3806,102 @@ async function update(){
         }
 
 
+        /* ==================================================
+           ARRIVALS
+
+           We calculate these BEFORE deciding
+           whether a departure may hold the
+           screen.
+
+           Very close arrivals can interrupt
+           departure activity at busy airports.
+        ================================================== */
+
+        const arrivals=[];
+
+
+        for(
+            const ac
+            of aircraft
+        ){
+
+            const candidate=
+                displayArrivalCandidate(
+                    ac
+                );
+
+
+            if(candidate){
+
+                arrivals.push(
+                    candidate
+                );
+            }
+        }
+
+
+        arrivals.sort(
+
+            (a,b)=>
+
+            a.distance
+            -
+            b.distance
+
+        );
+
+
+        const imminentArrival=
+
+            arrivals.length
+
+            &&
+
+            arrivals[0].distance
+            <=
+            1.5
+
+            ?
+
+            arrivals[0]
+
+            :
+
+            null;
+
+
         /*
-           =====================================
-           2 — TAKEOFF ROLL
-           =====================================
+           IMMINENT LANDING
+           beats departure display.
         */
 
-        let bestGroundDeparture=null;
+        if(imminentArrival){
+
+            announceArrival(
+
+                imminentArrival.ac,
+
+                imminentArrival.distance
+
+            );
 
 
-        for(const ac of aircraft){
+            return;
+        }
+
+
+        /* ==================================================
+           TAKEOFF ROLL
+        ================================================== */
+
+        let bestGroundDeparture=
+            null;
+
+
+        for(
+            const ac
+            of aircraft
+        ){
 
             if(
                 !departureAcceleration(ac)
@@ -1998,6 +3918,7 @@ async function update(){
 
 
             const latest=
+
                 memory.samples[
                     memory.samples.length-1
                 ];
@@ -2008,16 +3929,25 @@ async function update(){
 
 
             if(
+
                 !bestGroundDeparture
+
                 ||
-                score>
+
+                score
+                >
                 bestGroundDeparture.score
+
             ){
 
                 bestGroundDeparture={
+
                     ac,
+
                     id,
+
                     score
+
                 };
             }
         }
@@ -2029,9 +3959,8 @@ async function update(){
                 bestGroundDeparture.id;
 
 
-            showState(
-                bestGroundDeparture.ac,
-                "TAKE OFF"
+            announceDeparture(
+                bestGroundDeparture.ac
             );
 
 
@@ -2039,21 +3968,24 @@ async function update(){
         }
 
 
-        /*
-           =====================================
-           3 — ACTIVE DEPARTURE
-           CUT OFF AT 3000 FT
-           =====================================
-        */
+        /* ==================================================
+           ACTIVE DEPARTURE
+
+           RELEASE AT 2000 FT
+        ================================================== */
 
         if(activeDeparture){
 
             const ac=
+
                 aircraft.find(
-                    item =>
+
+                    item=>
+
                     aircraftId(item)
                     ===
                     activeDeparture
+
                 );
 
 
@@ -2065,11 +3997,7 @@ async function update(){
 
                 if(onGround(ac)){
 
-                    showState(
-                        ac,
-                        "TAKE OFF"
-                    );
-
+                    announceDeparture(ac);
 
                     return;
                 }
@@ -2081,11 +4009,7 @@ async function update(){
                     alt<2000
                 ){
 
-                    showState(
-                        ac,
-                        "TAKE OFF"
-                    );
-
+                    announceDeparture(ac);
 
                     return;
                 }
@@ -2099,45 +4023,62 @@ async function update(){
 
                     activeDeparture=null;
                 }
-            }
 
+            }
 
             else{
 
                 const memory=
+
                     aircraftMemory.get(
                         activeDeparture
                     );
 
 
                 if(
+
                     memory
+
                     &&
-                    Date.now()-
+
+                    Date.now()
+                    -
                     memory.lastSeen
+
                     <
+
                     90000
+
                 ){
 
-                    return;
+                    /*
+                       Keep departure memory,
+                       but we no longer need
+                       to keep the popup open.
+                    */
+
                 }
 
+                else{
 
-                activeDeparture=null;
+                    activeDeparture=null;
+                }
             }
         }
 
 
-        /*
-           =====================================
-           4 — AIRBORNE DEPARTURE FALLBACK
-           =====================================
-        */
+        /* ==================================================
+           AIRBORNE DEPARTURE FALLBACK
+        ================================================== */
 
-        let airborneDep=null;
+        let airborneDep=
+            null;
 
 
-        for(const ac of aircraft){
+        for(
+            const ac
+            of aircraft
+        ){
 
             if(
                 !airborneDeparture(ac)
@@ -2150,28 +4091,43 @@ async function update(){
 
 
             const score=
+
                 (
                     verticalRate(ac)
-                    *2
+                    *
+                    2
                 )
+
                 -
+
                 (
-                    alt||0
+                    alt
+                    ||
+                    0
                 );
 
 
             if(
+
                 !airborneDep
+
                 ||
-                score>
+
+                score
+                >
                 airborneDep.score
+
             ){
 
                 airborneDep={
+
                     ac,
+
                     id:
                         aircraftId(ac),
+
                     score
+
                 };
             }
         }
@@ -2183,9 +4139,8 @@ async function update(){
                 airborneDep.id;
 
 
-            showState(
-                airborneDep.ac,
-                "TAKE OFF"
+            announceDeparture(
+                airborneDep.ac
             );
 
 
@@ -2193,24 +4148,21 @@ async function update(){
         }
 
 
-        /*
-           =====================================
-           5 — LANDED HOLD
-           =====================================
-        */
+        /* ==================================================
+           LANDED HOLD
+        ================================================== */
 
         if(landedDisplay){
 
             if(
-                Date.now()<
+
+                Date.now()
+
+                <
+
                 landedDisplay.until
+
             ){
-
-                showState(
-                    landedDisplay.ac,
-                    "LANDED"
-                );
-
 
                 return;
             }
@@ -2220,73 +4172,52 @@ async function update(){
         }
 
 
-        /*
-           =====================================
-           6 — APPROACHING
-           =====================================
-        */
-
-        const arrivals=[];
-
-
-        for(const ac of aircraft){
-
-            const candidate=
-                displayArrivalCandidate(ac);
-
-
-            if(candidate)
-                arrivals.push(
-                    candidate
-                );
-        }
-
-
-        arrivals.sort(
-            (a,b)=>
-            a.distance-
-            b.distance
-        );
-
+        /* ==================================================
+           NORMAL FINAL APPROACH
+        ================================================== */
 
         if(arrivals.length){
 
-            showState(
+            announceArrival(
+
                 arrivals[0].ac,
-                "APPROACHING"
+
+                arrivals[0].distance
+
             );
 
 
             return;
         }
 
-
-        /*
-           NOTHING IMPORTANT
-        */
-
-        clearDisplay();
-
     }
 
     catch(error){
 
-        console.error(error);
-
-        clearDisplay();
+        console.error(
+            error
+        );
     }
 }
 
+
+/* =========================================================
+   START
+========================================================= */
 
 update();
 
 
 setInterval(
+
     update,
+
     3000
+
 );
 
 </script>
 
 </body>
+
 </html>
