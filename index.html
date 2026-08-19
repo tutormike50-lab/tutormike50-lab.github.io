@@ -2549,6 +2549,8 @@ async function loadAircraftPhoto(
 
         const data=
             await response.json();
+       document.querySelector(".tracking-chip").textContent =
+    "LIVE TRACKING • " + (data.ac || []).length + " AIRCRAFT";
 
 
         if(
