@@ -1229,7 +1229,20 @@ let tickerEvents=[];
 const tickerKeys=
     new Set();
 
+function removeTicker(key){
 
+    tickerEvents=
+        tickerEvents.filter(
+            item =>
+            item.key!==key
+        );
+
+
+    tickerKeys.delete(key);
+
+
+    rebuildTicker();
+}
 function addTicker(
     key,
     text,
