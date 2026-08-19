@@ -422,7 +422,7 @@ body{
     min-width:max-content;
 
     animation:
-        tickerMove 60s linear infinite;
+        tickerMove 42s linear infinite;
 
     padding-left:100%;
 }
@@ -1249,11 +1249,25 @@ function addTicker(
     level="silver"
 ){
 
-    if(tickerKeys.has(key))
-        return;
+    const aircraftKey=
+        key.split(":").slice(1).join(":");
 
 
-    tickerKeys.add(key);
+    tickerEvents=
+        tickerEvents.filter(
+            item => {
+
+                const existingAircraft=
+                    item.key
+                    .split(":")
+                    .slice(1)
+                    .join(":");
+
+                return existingAircraft
+                    !==
+                    aircraftKey;
+            }
+        );
 
 
     tickerEvents.unshift({
@@ -1270,16 +1284,25 @@ function addTicker(
     });
 
 
-    if(tickerEvents.length>10){
+    if(tickerEvents.length>8){
 
         tickerEvents=
-            tickerEvents.slice(0,10);
+            tickerEvents.slice(0,8);
+    }
+
+
+    tickerKeys.clear();
+
+    for(const item of tickerEvents){
+
+        tickerKeys.add(
+            item.key
+        );
     }
 
 
     rebuildTicker();
 }
-
 
 function rebuildTicker(){
 
