@@ -1341,19 +1341,18 @@ function rebuildTicker(){
         defaults;
 
 
-    track.innerHTML=
+   track.innerHTML=
+    events
+    .map(item=>
 
-        events
-        .map(item=>
+        '<span class="ticker-item '+
+        item.level+
+        '">'+
+        item.text+
+        '</span>'
 
-            '<span class="ticker-item '+
-            item.level+
-            '">'+
-            item.text+
-            '</span>'
-
-        )
-        .join("")
+    )
+    .join("");
 
         +
 
