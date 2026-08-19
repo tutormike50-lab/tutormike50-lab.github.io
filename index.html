@@ -2946,6 +2946,9 @@ function announceLanded(ac){
 
     const id=
         aircraftId(ac);
+   removeTicker(
+    "EXPECTED_ARRIVAL:"+id
+);
 
 
     const popupKey=
