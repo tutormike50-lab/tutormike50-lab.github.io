@@ -454,112 +454,76 @@ html,body{
 }
 
 /* =====================================================
-   AIRLINE TAIL
+   AIRCRAFT DIRECTION CARD
 ===================================================== */
 
-.tailCard{
+.planeCard{
     width:158px;
     height:134px;
-
-    position:relative;
-
     flex:0 0 auto;
-
     border-radius:10px;
-
-    overflow:hidden;
-
-    background:
-        linear-gradient(
-            145deg,
-            #0c253b,
-            #0c4168
-        );
-
-    border:
-        1px solid
-        rgba(255,255,255,.24);
-}
-
-.tailFin{
-    position:absolute;
-
-    left:33px;
-    bottom:-7px;
-
-    width:94px;
-    height:130px;
-
-    clip-path:
-        polygon(
-            18% 100%,
-            0 15%,
-            52% 0,
-            100% 9%,
-            87% 100%
-        );
-
-    border-radius:
-        5px 34px 3px 4px;
-
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-
-    filter:
-        drop-shadow(
-            0 7px 8px
-            rgba(0,0,0,.32)
-        );
+    gap:8px;
+    background:
+        linear-gradient(145deg,#0c253b,#0c4168);
+    border:1px solid rgba(255,255,255,.24);
 }
 
-.tailFin img{
-    max-width:60px;
-    max-height:60px;
-
-    object-fit:contain;
-
-    filter:
-        drop-shadow(
-            0 2px 2px
-            rgba(0,0,0,.28)
-        );
+.planeIcon{
+    width:70px;
+    height:70px;
+    color:#fff;
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,.42));
+    transition:transform .35s ease;
 }
 
-.tailCode{
-    font-size:27px;
+.planeIcon svg{
+    width:100%;
+    height:100%;
+    display:block;
+    fill:currentColor;
+}
+
+.planeIcon.departure{
+    transform:rotate(-45deg);
+}
+
+.planeIcon.arrival{
+    transform:rotate(135deg);
+}
+
+.planeRoute{
+    max-width:138px;
+    text-align:center;
+    font-size:13px;
     font-weight:900;
-
-    letter-spacing:1.5px;
-
-    text-shadow:
-        0 2px 4px
-        rgba(0,0,0,.35);
+    letter-spacing:1px;
+    color:#fff;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .popupInfo{
     flex:1;
-
     min-width:0;
-
     padding-left:20px;
 }
 
 .state{
     font-size:39px;
     font-weight:900;
-
     letter-spacing:3px;
-
     line-height:1;
 }
 
 .flight{
     margin-top:11px;
-
     font-size:21px;
     font-weight:900;
-
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -567,17 +531,13 @@ html,body{
 
 .details{
     margin-top:7px;
-
     font-size:14px;
     font-weight:700;
-
     color:#d5e5ee;
-
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 }
-
 
 /* =====================================================
    AIRPORT SELECTOR — operator control
@@ -646,24 +606,22 @@ html,body{
     class="popup"
 >
 
-    <div class="tailCard">
+    <div class="planeCard">
 
         <div
-            id="tailFin"
-            class="tailFin"
+            id="planeIcon"
+            class="planeIcon departure"
+            aria-hidden="true"
         >
-
-            <img
-                id="tailLogo"
-                alt=""
-            >
-
-            <div
-                id="tailCode"
-                class="tailCode"
-            ></div>
-
+            <svg viewBox="0 0 64 64" focusable="false">
+                <path d="M32 3c2.2 0 3.4 2.5 4 4.7l4.8 18.1 15.9 9.4c1.5.9 2.4 2.5 2.4 4.2v3.3L39 37.9l-2.2 13.7 6.7 5.1v3.4L32 57l-11.5 3.1v-3.4l6.7-5.1L25 37.9 4.9 42.7v-3.3c0-1.7.9-3.3 2.4-4.2l15.9-9.4L28 7.7C28.6 5.5 29.8 3 32 3z"/>
+            </svg>
         </div>
+
+        <div
+            id="planeRoute"
+            class="planeRoute"
+        ></div>
 
     </div>
 
@@ -2773,102 +2731,42 @@ function routeLabel(ac,state){
 
 
 /* =====================================================
-   COLOURED AIRLINE TAIL
+   AIRCRAFT DIRECTION GRAPHIC
+   Presentation only — tracking engine unchanged.
 ===================================================== */
 
-function setTail(ac){
+function routePairLabel(ac,state){
 
-    const prefix=
-        airlinePrefix(ac);
+    const route=cachedRoute(ac);
 
+    if(state==="ARRIVAL" || state==="ARRIVED"){
+        if(route && route.from && route.from!==AIRPORT.code && route.from!==AIRPORT.icao)
+            return route.from+" → "+AIRPORT.code;
 
-    const airlineBrand=
-        brand[prefix]
-        ||
-        {
-            c:"#2e6d99",
-            s:null
-        };
-
-
-    const fin=
-        document
-        .getElementById(
-            "tailFin"
-        );
-
-
-    const image=
-        document
-        .getElementById(
-            "tailLogo"
-        );
-
-
-    const code=
-        document
-        .getElementById(
-            "tailCode"
-        );
-
-
-    fin.style.background=
-
-        "linear-gradient(145deg,"
-        +
-        airlineBrand.c
-        +
-        ",#0a2540)";
-
-
-    image.style.display=
-        "none";
-
-
-    code.textContent=
-        prefix||"AIR";
-
-
-    code.style.display=
-        "block";
-
-
-    if(
-        airlineBrand.s
-    ){
-
-        image.onload=
-            ()=>{
-
-                image.style.display=
-                    "block";
-
-                code.style.display=
-                    "none";
-            };
-
-
-        image.onerror=
-            ()=>{
-
-                image.style.display=
-                    "none";
-
-                code.style.display=
-                    "block";
-            };
-
-
-        image.src=
-
-            "https://cdn.simpleicons.org/"
-            +
-            airlineBrand.s
-            +
-            "/ffffff";
+        return "→ "+AIRPORT.code;
     }
+
+    if(state==="DEPARTURE" || state==="DEPARTED"){
+        if(route && route.to && route.to!==AIRPORT.code && route.to!==AIRPORT.icao)
+            return AIRPORT.code+" → "+route.to;
+
+        return AIRPORT.code+" →";
+    }
+
+    return AIRPORT.code;
 }
 
+function setPlaneGraphic(ac,state){
+
+    const icon=document.getElementById("planeIcon");
+    const route=document.getElementById("planeRoute");
+
+    icon.className=
+        "planeIcon "+
+        (state==="DEPARTURE" ? "departure" : "arrival");
+
+    route.textContent=routePairLabel(ac,state);
+}
 
 /* =====================================================
    BIG ARRIVAL / DEPARTURE POPUP
@@ -2925,7 +2823,7 @@ function showPopup(
     };
 
     paintDetails();
-    setTail(ac);
+    setPlaneGraphic(ac,state);
 
     popup.classList.remove("show");
     void popup.offsetWidth;
@@ -2933,8 +2831,10 @@ function showPopup(
 
     /* Route enrichment is optional and asynchronous. */
     ensureRoute(ac).then(()=>{
-        if(popupAircraft===id && popupDirection===state)
+        if(popupAircraft===id && popupDirection===state){
             paintDetails();
+            setPlaneGraphic(ac,state);
+        }
     });
 
     clearTimeout(popupTimer);
