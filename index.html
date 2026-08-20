@@ -3186,7 +3186,9 @@ function renderTrafficDeck(){
         document.getElementById("nextArrivalFlight").textContent=callsign(ac);
         document.getElementById("nextArrivalEta").textContent=nextArrival.distance.toFixed(1)+" KM";
         document.getElementById("nextArrivalSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"INBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"ARRIVAL"):"");
-        ensureRoute(ac).then(()=>renderTrafficDeck());
+        /* Route lookup is asynchronous, but the deck is refreshed by the
+           normal ADS-B cycle. Never recursively call renderTrafficDeck(). */
+        ensureRoute(ac);
     }
     else{
         arrCard.classList.add("empty");
@@ -3201,7 +3203,9 @@ function renderTrafficDeck(){
         document.getElementById("nextDepartureFlight").textContent=callsign(ac);
         document.getElementById("nextDepartureEta").textContent=Math.round(groundSpeed(ac))+" KT";
         document.getElementById("nextDepartureSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"OUTBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"DEPARTURE"):"");
-        ensureRoute(ac).then(()=>renderTrafficDeck());
+        /* Route lookup is asynchronous, but the deck is refreshed by the
+           normal ADS-B cycle. Never recursively call renderTrafficDeck(). */
+        ensureRoute(ac);
     }
     else{
         depCard.classList.add("empty");
@@ -3457,7 +3461,6 @@ function renderRail(){
 
 setInterval(()=>{
     renderRail();
-    renderTrafficDeck();
 },3000);
 renderRail();
 renderTrafficDeck();
@@ -3697,6 +3700,10 @@ async function update(){
             expectedDepartures[0]
             ||
             null;
+
+
+        /* Refresh NEXT IN / NEXT OUT once per ADS-B cycle. */
+        renderTrafficDeck();
 
 
         /* =============================================
