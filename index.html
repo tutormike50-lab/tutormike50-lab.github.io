@@ -565,7 +565,9 @@ html,body{
 
 /* departure: aircraft pitches up and climbs gently */
 .flightPlane.departure{
-    transform:rotate(167deg) translate(0,3px);
+    /* Fixed side-profile climb attitude. Never follows ADS-B heading,
+       so the graphic can never roll or flip upside down. */
+    transform:rotate(-7deg) translate(0,3px);
 }
 
 .flightPlane.departure:after{
@@ -581,7 +583,8 @@ html,body{
 /* arrival: aircraft remains believable/near-level, gear down,
    while the whole silhouette follows a shallow descending path */
 .flightPlane.arrival{
-    transform:rotate(177deg) translate(0,-2px);
+    /* Fixed shallow approach attitude. No heading-driven rotation. */
+    transform:rotate(3deg) translate(0,-2px);
 }
 
 .flightPlane.arrival .gear{
@@ -599,13 +602,13 @@ html,body{
 }
 
 @keyframes planeTakeoff{
-    from{transform:rotate(167deg) translate(-5px,5px)}
-    to{transform:rotate(167deg) translate(8px,-7px)}
+    from{transform:rotate(-7deg) translate(-5px,5px)}
+    to{transform:rotate(-7deg) translate(8px,-7px)}
 }
 
 @keyframes planeApproach{
-    from{transform:rotate(177deg) translate(-7px,-6px)}
-    to{transform:rotate(177deg) translate(8px,5px)}
+    from{transform:rotate(3deg) translate(-7px,-6px)}
+    to{transform:rotate(3deg) translate(8px,5px)}
 }
 
 /* =====================================================
@@ -1413,9 +1416,6 @@ let popupBusyUntil=0;
 let popupDirection=null;
 
 let popupAircraft=null;
-
-/* Fair popup scheduler: when arrival and departure compete, alternate. */
-let lastPopupChoice="ARRIVAL";
 
 let lastMovement=null;
 
@@ -2943,9 +2943,18 @@ function showPopup(
     if(popupShown.has(id))
         return;
 
-    /* Do not interrupt a popup that is already on screen. */
-    if(now<popupBusyUntil)
-        return;
+    /* Normally do not interrupt a popup already on screen.
+       Exception: a real departure is very short-lived, so let it
+       replace an arrival popup rather than missing the takeoff. */
+    if(now<popupBusyUntil){
+        const departurePreemptsArrival=
+            state==="DEPARTURE"
+            &&
+            popupDirection==="ARRIVAL";
+
+        if(!departurePreemptsArrival)
+            return;
+    }
 
     popupShown.set(id,now);
 
@@ -3395,10 +3404,6 @@ async function update(){
 
         /* =============================================
            TOUCHDOWN
-
-           Record it, but DO NOT return from the update.
-           At busy hubs a touchdown must not prevent the
-           departure detector from running in the same cycle.
         ============================================= */
 
         const touchdown=
@@ -3441,52 +3446,93 @@ async function update(){
                 touchdown,
                 "ARRIVED"
             );
+
+
+            return;
         }
 
 
         /* =============================================
-           FINAL ARRIVAL
+           DEPARTURE CONTINUITY FIRST
+
+           Once a departure has been acquired, keep following it
+           until 2000 ft. This prevents a nearby arrival from
+           stealing focus halfway through the takeoff.
         ============================================= */
 
-        const finals=[];
+        if(activeDeparture){
 
-
-        for(
-            const ac
-            of aircraft
-        ){
-
-            const candidate=
-                finalArrival(ac);
-
-
-            if(candidate){
-
-                finals.push(
-                    candidate
+            const ac=
+                aircraft.find(
+                    item=>
+                    aircraftId(item)
+                    ===
+                    activeDeparture
                 );
+
+
+            if(ac){
+
+                const alt=
+                    altitude(ac);
+
+
+                if(
+                    !onGround(ac)
+                ){
+
+                    movement(
+                        ac,
+                        "DEPARTED"
+                    );
+
+
+                    showPopup(
+                        ac,
+                        "DEPARTURE"
+                    );
+
+
+                    if(
+                        alt!==null
+                        &&
+                        alt>=2000
+                    ){
+
+                        activeDeparture=
+                            null;
+                    }
+
+                    else{
+
+                        return;
+                    }
+
+                }
+
+                else{
+
+                    /* Aircraft is still on the runway/takeoff roll.
+                       Keep ownership of it instead of allowing an
+                       arrival to take over the camera event. */
+                    return;
+                }
+
+            }
+
+            else{
+
+                activeDeparture=
+                    null;
             }
         }
-
-
-        finals.sort(
-            (a,b)=>
-            a.distance-b.distance
-        );
-
-
-        const arrivalPopupCandidate=
-            finals.length
-            ? finals[0].ac
-            : null;
 
 
         /* =============================================
            TAKEOFF ROLL
 
-           Always evaluate this even when an arrival is
-           on final. This removes the arrival-first bias
-           that was most noticeable at LHR/FRA/AMS/CDG.
+           A takeoff roll is a short event, so it is checked before
+           final arrivals. This removes the old arrival-first bias.
         ============================================= */
 
         let bestDeparture=
@@ -3529,84 +3575,27 @@ async function update(){
         }
 
 
-        let departurePopupCandidate=
-            null;
-
-
         if(bestDeparture){
 
             activeDeparture=
                 bestDeparture.id;
 
-            departurePopupCandidate=
-                bestDeparture.ac;
-        }
+
+            showPopup(
+                bestDeparture.ac,
+                "DEPARTURE"
+            );
 
 
-        /* =============================================
-           ACTIVE DEPARTURE
-
-           Continue tracking to 2000 ft, but do not block
-           the rest of this update cycle. The popup itself
-           remains one-shot per aircraft.
-        ============================================= */
-
-        if(activeDeparture){
-
-            const ac=
-                aircraft.find(
-                    item=>
-                    aircraftId(item)
-                    ===
-                    activeDeparture
-                );
-
-
-            if(ac){
-
-                const alt=
-                    altitude(ac);
-
-
-                if(
-                    !onGround(ac)
-                ){
-
-                    movement(
-                        ac,
-                        "DEPARTED"
-                    );
-
-
-                    if(!departurePopupCandidate){
-
-                        departurePopupCandidate=
-                            ac;
-                    }
-
-
-                    if(
-                        alt!==null
-                        &&
-                        alt>=2000
-                    ){
-
-                        activeDeparture=
-                            null;
-                    }
-                }
-            }
-
-            else{
-
-                activeDeparture=
-                    null;
-            }
+            return;
         }
 
 
         /* =============================================
            AIRBORNE DEPARTURE FALLBACK
+
+           Catch an aircraft that became airborne between ADS-B
+           updates. This also runs before final-arrival selection.
         ============================================= */
 
         let airborne=
@@ -3670,104 +3659,66 @@ async function update(){
             );
 
 
-            if(!departurePopupCandidate){
+            showPopup(
+                airborne.ac,
+                "DEPARTURE"
+            );
 
-                departurePopupCandidate=
-                    airborne.ac;
-            }
+
+            return;
         }
 
 
         /* =============================================
-           FAIR POPUP SCHEDULER
+           FINAL ARRIVAL
 
-           Detection above is unchanged. This section only
-           decides which already-qualified movement gets the
-           15-second information box when both compete.
-
-           - If only one side is eligible, show that side.
-           - If both are eligible, alternate ARRIVAL/DEPARTURE.
-           - A popup already on screen is never interrupted.
-           - Aircraft already shown remain one-shot as before.
+           Arrivals still work exactly as before, but no longer get
+           automatic first refusal over a genuine departure.
         ============================================= */
 
-        const popupFree=
-            Date.now()>=popupBusyUntil;
+        const finals=[];
 
 
-        if(popupFree){
+        for(
+            const ac
+            of aircraft
+        ){
 
-            const arrivalEligible=
-                arrivalPopupCandidate
-                &&
-                !popupShown.has(
-                    aircraftId(
-                        arrivalPopupCandidate
-                    )
+            const candidate=
+                finalArrival(ac);
+
+
+            if(candidate){
+
+                finals.push(
+                    candidate
                 );
+            }
+        }
 
 
-            const departureEligible=
-                departurePopupCandidate
-                &&
-                !popupShown.has(
-                    aircraftId(
-                        departurePopupCandidate
-                    )
-                );
+        finals.sort(
+            (a,b)=>
+            a.distance-b.distance
+        );
+
+
+        if(finals.length){
+
+            showPopup(
+                finals[0].ac,
+                "ARRIVAL"
+            );
 
 
             if(
-                arrivalEligible
-                &&
-                departureEligible
+                finals[0]
+                .distance
+                <=
+                1.5
             ){
 
-                if(
-                    lastPopupChoice==="ARRIVAL"
-                ){
-
-                    showPopup(
-                        departurePopupCandidate,
-                        "DEPARTURE"
-                    );
-
-                    lastPopupChoice=
-                        "DEPARTURE";
-                }
-
-                else{
-
-                    showPopup(
-                        arrivalPopupCandidate,
-                        "ARRIVAL"
-                    );
-
-                    lastPopupChoice=
-                        "ARRIVAL";
-                }
-            }
-
-            else if(departureEligible){
-
-                showPopup(
-                    departurePopupCandidate,
-                    "DEPARTURE"
-                );
-
-                lastPopupChoice=
-                    "DEPARTURE";
-            }
-
-            else if(arrivalEligible){
-
-                showPopup(
-                    arrivalPopupCandidate,
-                    "ARRIVAL"
-                );
-
-                lastPopupChoice=
-                    "ARRIVAL";
+                return;
             }
         }
 
