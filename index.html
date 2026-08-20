@@ -765,6 +765,184 @@ html,body{
     font-weight:800;
 }
 
+
+
+/* =====================================================
+   MIKEAIRCRAFT 2.0 — AVIATION BROADCAST HUD
+   Visual layer only. Proven ADS-B selection engine remains intact.
+===================================================== */
+:root{
+    --ma2-blue:#38b7ff;
+    --ma2-blue2:#087dca;
+    --ma2-ink:rgba(2,15,29,.94);
+    --ma2-glass:rgba(4,27,49,.88);
+    --ma2-line:rgba(156,218,255,.30);
+    --ma2-soft:#a8cce2;
+    --ma2-gold:#ffd45e;
+    --ma2-green:#68e3b1;
+    --ma2-ribbon:102px;
+    --ma2-rail:28px;
+}
+
+/* Permanent broadcast bar */
+.ribbon{
+    height:var(--ma2-ribbon);
+    background:
+      linear-gradient(90deg,rgba(2,14,28,.985),rgba(3,42,72,.97) 46%,rgba(2,20,38,.985));
+    border-top:1px solid rgba(129,207,255,.46);
+    box-shadow:0 -12px 32px rgba(0,0,0,.24),0 -1px 0 rgba(255,255,255,.08) inset;
+    backdrop-filter:blur(7px);
+}
+.main{height:calc(var(--ma2-ribbon) - var(--ma2-rail));}
+.ident{width:22%;padding:0 18px;border-right:1px solid var(--ma2-line);}
+.center{width:53%;padding:0 26px;}
+.system{width:25%;}
+.tower{transform:scale(.82);transform-origin:center;}
+.badge{gap:9px;}
+.code{font-size:37px;letter-spacing:3px;}
+.airportName{margin-top:4px;font-size:9px;letter-spacing:1.65px;}
+.live{font-size:9px;margin-top:4px;}
+.headline{font-size:19px;letter-spacing:2px;}
+.sub{font-size:10px;margin-top:5px;color:#9dc9e4;}
+.chip{
+    min-width:178px;
+    padding:8px 12px;
+    border-color:rgba(86,190,255,.42);
+    background:rgba(2,16,31,.54);
+    color:#bfe9ff;
+    box-shadow:0 0 18px rgba(26,154,237,.08) inset;
+}
+.rail{height:var(--ma2-rail);background:rgba(1,10,20,.98);}
+.railTag{min-width:116px;font-size:10px;background:#062139;color:#7fd0ff;}
+.tickerItem{font-size:11px;padding:0 18px;}
+.tickerState{font-size:10px;color:var(--ma2-gold);}
+.tickerSecondary{color:#7fd0ff;}
+
+/* Spotlight card: deliberately compact so aircraft remains the star */
+.popup{
+    left:24px;
+    bottom:var(--ma2-ribbon);
+    width:700px;
+    height:176px;
+    border:1px solid rgba(73,184,255,.72);
+    border-radius:14px 14px 0 0;
+    background:
+      linear-gradient(112deg,rgba(2,17,34,.975),rgba(4,41,72,.965) 58%,rgba(2,17,34,.985));
+    box-shadow:0 -14px 42px rgba(0,0,0,.30),0 0 26px rgba(28,157,239,.14),0 0 0 1px rgba(255,255,255,.05) inset;
+}
+.popup:before{
+    content:"";
+    position:absolute;
+    left:0;right:0;top:0;
+    height:3px;
+    background:linear-gradient(90deg,var(--ma2-blue),rgba(56,183,255,.12) 72%,transparent);
+    z-index:5;
+}
+.planeStage{
+    width:218px;
+    flex:0 0 218px;
+    border-right:1px solid rgba(136,211,255,.20);
+    background:
+       radial-gradient(ellipse at center,rgba(28,149,232,.14),transparent 62%),
+       linear-gradient(145deg,rgba(5,53,91,.22),rgba(1,15,28,.10));
+}
+.planeStage:before{
+    left:18px;top:28px;bottom:28px;width:2px;background:#2daeff;
+    box-shadow:0 0 12px rgba(45,174,255,.65);
+}
+.flightPlane{width:164px;height:92px;margin-left:18px;}
+.popupInfo{padding:20px 24px 18px 28px;}
+.state{
+    top:16px;right:22px;
+    padding:6px 9px;
+    border:1px solid rgba(255,212,94,.40);
+    border-radius:999px;
+    background:rgba(255,212,94,.07);
+    font-size:10px;letter-spacing:1.25px;color:var(--ma2-gold);
+}
+.state:after{width:6px;height:6px;background:var(--ma2-blue);}
+.flight{margin-top:14px;padding-right:112px;font-size:31px;letter-spacing:.8px;}
+.airlineLine{margin-top:8px;font-size:15px;letter-spacing:.7px;color:#fff;}
+.details{margin-top:6px;font-size:12px;color:#a9d0e6;letter-spacing:.45px;}
+.popupRoute{
+    margin-top:8px;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:1px;
+    color:var(--ma2-gold);
+}
+.popupMetrics{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+.metric{
+    padding:5px 8px;
+    border-radius:5px;
+    border:1px solid rgba(118,202,251,.22);
+    background:rgba(1,13,26,.35);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.85px;
+    color:#c8eaff;
+}
+.metric b{color:#fff;font-size:11px;margin-left:4px;}
+.popupProgress{left:246px;right:24px;bottom:11px;height:2px;background:rgba(255,255,255,.10);}
+.popupProgress span{background:linear-gradient(90deg,#20a9ff,#7bd9ff);}
+
+/* NEXT traffic deck. Quiet, glanceable, and independent of popup. */
+.trafficDeck{
+    position:absolute;
+    right:24px;
+    bottom:calc(var(--ma2-ribbon) + 16px);
+    z-index:44;
+    width:408px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    pointer-events:none;
+}
+.nextCard{
+    min-height:64px;
+    padding:9px 11px 8px;
+    border:1px solid rgba(117,204,255,.28);
+    border-radius:9px;
+    background:linear-gradient(145deg,rgba(2,20,37,.91),rgba(3,36,62,.87));
+    box-shadow:0 8px 20px rgba(0,0,0,.22);
+    backdrop-filter:blur(6px);
+}
+.nextCardHead{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.nextKind{font-size:8px;font-weight:900;letter-spacing:1.35px;color:#8bd2f8;}
+.nextEta{font-size:8px;font-weight:900;letter-spacing:.8px;color:var(--ma2-gold);}
+.nextFlight{margin-top:5px;font-size:15px;font-weight:900;letter-spacing:.7px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nextSub{margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.5px;color:#a9ccdf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nextCard.empty{opacity:.64;}
+
+/* Small system signature, useful when travelling between airports */
+.ma2Bug{
+    position:absolute;
+    left:24px;
+    bottom:calc(var(--ma2-ribbon) + 184px);
+    z-index:43;
+    padding:5px 8px;
+    border-radius:5px;
+    background:rgba(1,15,28,.64);
+    border:1px solid rgba(111,198,250,.18);
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:1.3px;
+    color:rgba(182,225,248,.76);
+    pointer-events:none;
+}
+
+@media(max-width:1050px){
+    .trafficDeck{width:350px;}
+    .popup{width:620px;}
+    .planeStage{width:190px;flex-basis:190px;}
+    .flightPlane{width:145px;}
+    .popupProgress{left:216px;}
+}
+
 </style>
 </head>
 
@@ -810,15 +988,32 @@ html,body{
     </div>
 
     <div class="popupInfo">
-        <div id="popupState" class="state">ARRIVAL</div>
+        <div id="popupState" class="state">ON FINAL</div>
         <div id="popupFlight" class="flight"></div>
         <div id="popupAirline" class="airlineLine"></div>
         <div id="popupDetails" class="details"></div>
+        <div id="popupRoute" class="popupRoute"></div>
+        <div id="popupMetrics" class="popupMetrics"></div>
         <div class="popupProgress"><span></span></div>
     </div>
 
 </div>
 
+
+<div class="ma2Bug">MIKEAIRCRAFT • LIVE TRAFFIC ENGINE</div>
+
+<div id="trafficDeck" class="trafficDeck" aria-live="off">
+    <div id="nextArrivalCard" class="nextCard empty">
+        <div class="nextCardHead"><span class="nextKind">NEXT IN</span><span id="nextArrivalEta" class="nextEta">SCANNING</span></div>
+        <div id="nextArrivalFlight" class="nextFlight">—</div>
+        <div id="nextArrivalSub" class="nextSub">Looking for inbound traffic</div>
+    </div>
+    <div id="nextDepartureCard" class="nextCard empty">
+        <div class="nextCardHead"><span class="nextKind">NEXT OUT</span><span id="nextDepartureEta" class="nextEta">SCANNING</span></div>
+        <div id="nextDepartureFlight" class="nextFlight">—</div>
+        <div id="nextDepartureSub" class="nextSub">Looking for outbound traffic</div>
+    </div>
+</div>
 
 <!-- =====================================================
      PERMANENT RIBBON
@@ -866,7 +1061,7 @@ html,body{
         <div class="center">
 
             <div class="headline">
-                LIVE AIR TRAFFIC
+                LIVE AIRCRAFT • REAL-TIME
             </div>
 
             <div
@@ -2921,6 +3116,101 @@ function setPlaneGraphic(ac,state){
         (state==="DEPARTURE" ? "departure" : "arrival");
 }
 
+
+function movementStateLabel(ac,state){
+    if(state==="ARRIVAL"){
+        const t=nearestThreshold(ac);
+        if(t && t.distance<=3)
+            return "ON FINAL";
+        return "ARRIVAL";
+    }
+
+    if(state==="DEPARTURE"){
+        if(onGround(ac))
+            return "TAKEOFF ROLL";
+        return "DEPARTING";
+    }
+
+    return state;
+}
+
+function popupDistance(ac,state){
+    if(state==="ARRIVAL"){
+        const t=nearestThreshold(ac);
+        if(t && Number.isFinite(t.distance))
+            return t.distance;
+    }
+    const d=airportDistance(ac);
+    return Number.isFinite(d) && d<900 ? d : null;
+}
+
+function popupMetricHTML(ac,state){
+    const bits=[];
+    const alt=altitude(ac);
+    const speed=groundSpeed(ac);
+    const dist=popupDistance(ac,state);
+
+    if(alt!==null && !onGround(ac))
+        bits.push('<span class="metric">ALT <b>'+Math.round(alt).toLocaleString()+ ' FT</b></span>');
+
+    if(speed>0)
+        bits.push('<span class="metric">SPD <b>'+Math.round(speed)+' KT</b></span>');
+
+    if(dist!==null)
+        bits.push('<span class="metric">DIST <b>'+dist.toFixed(1)+' KM</b></span>');
+
+    return bits.join("");
+}
+
+function updatePopupEnrichment(ac,state,id){
+    if(popupAircraft!==id)
+        return;
+
+    document.getElementById("popupState").textContent=movementStateLabel(ac,state);
+    document.getElementById("popupDetails").textContent=aircraftDetail(ac) || "LIVE ADS-B TRACK";
+    document.getElementById("popupMetrics").innerHTML=popupMetricHTML(ac,state);
+
+    const route=routePairLabel(ac,state);
+    document.getElementById("popupRoute").textContent=route || AIRPORT.code;
+}
+
+function renderTrafficDeck(){
+    const arrCard=document.getElementById("nextArrivalCard");
+    const depCard=document.getElementById("nextDepartureCard");
+    if(!arrCard || !depCard)
+        return;
+
+    if(nextArrival && nextArrival.ac){
+        const ac=nextArrival.ac;
+        arrCard.classList.remove("empty");
+        document.getElementById("nextArrivalFlight").textContent=callsign(ac);
+        document.getElementById("nextArrivalEta").textContent=nextArrival.distance.toFixed(1)+" KM";
+        document.getElementById("nextArrivalSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"INBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"ARRIVAL"):"");
+        ensureRoute(ac).then(()=>renderTrafficDeck());
+    }
+    else{
+        arrCard.classList.add("empty");
+        document.getElementById("nextArrivalFlight").textContent="—";
+        document.getElementById("nextArrivalEta").textContent="SCANNING";
+        document.getElementById("nextArrivalSub").textContent="Looking for inbound traffic";
+    }
+
+    if(nextDeparture && nextDeparture.ac){
+        const ac=nextDeparture.ac;
+        depCard.classList.remove("empty");
+        document.getElementById("nextDepartureFlight").textContent=callsign(ac);
+        document.getElementById("nextDepartureEta").textContent=Math.round(groundSpeed(ac))+" KT";
+        document.getElementById("nextDepartureSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"OUTBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"DEPARTURE"):"");
+        ensureRoute(ac).then(()=>renderTrafficDeck());
+    }
+    else{
+        depCard.classList.add("empty");
+        document.getElementById("nextDepartureFlight").textContent="—";
+        document.getElementById("nextDepartureEta").textContent="SCANNING";
+        document.getElementById("nextDepartureSub").textContent="Looking for outbound traffic";
+    }
+}
+
 /* =====================================================
    BIG ARRIVAL / DEPARTURE POPUP
 
@@ -2969,10 +3259,12 @@ function showPopup(
         "popup "+
         (state==="DEPARTURE" ? "departure" : "arrival");
 
-    document.getElementById("popupState").textContent=state;
     document.getElementById("popupFlight").textContent=callsign(ac);
     document.getElementById("popupAirline").textContent=airlineName(ac) || "COMMERCIAL AIRCRAFT";
-    document.getElementById("popupDetails").textContent=liveAircraftDetail(ac);
+    updatePopupEnrichment(ac,state,id);
+
+    /* Route enrichment is optional and never blocks the live event. */
+    ensureRoute(ac).then(()=>updatePopupEnrichment(ac,state,id));
 
     setPlaneGraphic(ac,state);
 
@@ -3163,8 +3455,12 @@ function renderRail(){
     }
 }
 
-setInterval(renderRail,3000);
+setInterval(()=>{
+    renderRail();
+    renderTrafficDeck();
+},3000);
 renderRail();
+renderTrafficDeck();
 
 
 /* =====================================================
