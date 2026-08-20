@@ -314,78 +314,113 @@ html,body{
 }
 
 /* =====================================================
-   INFORMATION RAIL
+   CONTINUOUS LIVE TRAFFIC TICKER
+   Presentation only — engine data is unchanged.
 ===================================================== */
 
 .rail{
     position:absolute;
-
     left:0;
     right:0;
     bottom:0;
-
     height:var(--rail);
-
     display:flex;
     align-items:center;
-
-    background:
-        rgba(2,15,28,.94);
-
-    border-top:
-        1px solid
-        rgba(255,255,255,.14);
+    overflow:hidden;
+    background:rgba(2,15,28,.96);
+    border-top:1px solid rgba(255,255,255,.14);
 }
 
 .railTag{
+    position:relative;
+    z-index:3;
     height:100%;
-    min-width:125px;
-
-    padding:0 13px;
-
+    min-width:128px;
+    padding:0 14px;
     display:flex;
     align-items:center;
     justify-content:center;
-
+    flex:0 0 auto;
     background:#071e34;
-
-    border-right:
-        1px solid
-        rgba(255,255,255,.18);
-
+    border-right:1px solid rgba(255,255,255,.18);
+    box-shadow:8px 0 14px rgba(2,15,28,.86);
     font-size:11px;
     font-weight:900;
-
-    letter-spacing:1.2px;
-
+    letter-spacing:1.25px;
     color:#a9dcff;
 }
 
-.railText{
+.railViewport{
+    position:relative;
     flex:1;
+    min-width:0;
+    height:100%;
+    overflow:hidden;
+}
 
-    padding:0 18px;
+.railTrack{
+    position:absolute;
+    left:0;
+    top:0;
+    height:100%;
+    display:flex;
+    align-items:center;
+    width:max-content;
+    white-space:nowrap;
+    will-change:transform;
+    animation:tickerFlow var(--ticker-duration,34s) linear infinite;
+}
 
+.railTrack:hover{
+    animation-play-state:running;
+}
+
+.tickerGroup{
+    display:flex;
+    align-items:center;
+    height:100%;
+    flex:0 0 auto;
+}
+
+.tickerItem{
+    display:inline-flex;
+    align-items:center;
+    height:100%;
+    padding:0 22px;
+    border-right:1px solid rgba(255,255,255,.13);
     font-size:13px;
     font-weight:800;
-
-    letter-spacing:.5px;
-
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    letter-spacing:.45px;
+    color:#fff;
 }
 
-.railState{
+.tickerState{
+    margin-right:9px;
     color:var(--yellow);
-
-    margin-right:10px;
-
     font-weight:900;
+    letter-spacing:.8px;
 }
 
-.railState.done{
+.tickerState.done{
     color:#dbe4ea;
+}
+
+.tickerSep{
+    margin:0 8px;
+    color:rgba(255,255,255,.45);
+}
+
+.tickerSecondary{
+    color:var(--yellow);
+}
+
+.tickerIdle{
+    color:#b9d7e9;
+}
+
+@keyframes tickerFlow{
+    from{transform:translateX(0)}
+    to{transform:translateX(-50%)}
 }
 
 /* =====================================================
@@ -446,6 +481,8 @@ html,body{
 
 /* =====================================================
    DYNAMIC AIRCRAFT GRAPHIC
+   Side-profile aircraft: climb on departure, stable
+   approach attitude on arrival. Presentation only.
 ===================================================== */
 
 .planeStage{
@@ -453,15 +490,12 @@ html,body{
     width:235px;
     flex:0 0 235px;
     overflow:hidden;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     border-right:1px solid rgba(255,255,255,.18);
-
     background:
-        radial-gradient(circle at 45% 48%,rgba(39,142,255,.18),transparent 52%),
+        radial-gradient(circle at 48% 48%,rgba(39,142,255,.19),transparent 54%),
         linear-gradient(135deg,rgba(8,56,111,.26),rgba(1,15,36,.12));
 }
 
@@ -479,14 +513,14 @@ html,body{
 
 .flightPlane{
     position:relative;
-    width:168px;
-    height:92px;
+    width:176px;
+    height:96px;
     margin-left:24px;
     color:#fff;
     filter:
         drop-shadow(0 4px 4px rgba(0,0,0,.36))
-        drop-shadow(0 0 8px rgba(255,255,255,.18));
-    transform-origin:48% 55%;
+        drop-shadow(0 0 9px rgba(255,255,255,.18));
+    transform-origin:52% 58%;
 }
 
 .flightPlane svg{
@@ -496,67 +530,82 @@ html,body{
     overflow:visible;
 }
 
-.flightPlane .airframe{
+.flightPlane .fuselage,
+.flightPlane .tail,
+.flightPlane .wing,
+.flightPlane .engine,
+.flightPlane .gear{
     fill:currentColor;
 }
 
-.flightPlane .windows,
-.flightPlane .detailsStroke{
+.flightPlane .windowLine{
     fill:none;
-    stroke:rgba(4,34,70,.62);
-    stroke-width:1.5;
+    stroke:rgba(3,31,64,.72);
+    stroke-width:1.7;
     stroke-linecap:round;
 }
 
+.flightPlane .gear{
+    opacity:0;
+}
+
+/* trajectory glow sits behind the aircraft */
 .flightPlane:after{
     content:"";
     position:absolute;
     z-index:-1;
-    left:-52px;
-    top:49%;
-    width:95px;
-    height:4px;
+    right:112px;
+    top:56%;
+    width:112px;
+    height:5px;
     border-radius:100%;
-    opacity:.9;
     transform-origin:right center;
+    opacity:.92;
 }
 
+/* departure: aircraft pitches up and climbs gently */
 .flightPlane.departure{
-    transform:rotate(-20deg) translateY(4px);
+    transform:rotate(-13deg) translate(0,3px);
 }
 
 .flightPlane.departure:after{
-    background:linear-gradient(90deg,transparent,#168cff,#7ac7ff);
-    box-shadow:0 0 12px #168cff;
-    transform:rotate(3deg);
+    background:linear-gradient(90deg,transparent,#168cff,#8cd4ff);
+    box-shadow:0 0 13px #168cff;
+    transform:rotate(4deg);
 }
 
 .popup.show .flightPlane.departure{
-    animation:planeTakeoff 2.5s ease-in-out infinite alternate;
+    animation:planeTakeoff 2.4s ease-in-out infinite alternate;
 }
 
+/* arrival: aircraft remains believable/near-level, gear down,
+   while the whole silhouette follows a shallow descending path */
 .flightPlane.arrival{
-    transform:rotate(10deg) translateY(-2px);
+    transform:rotate(-3deg) translate(0,-2px);
+}
+
+.flightPlane.arrival .gear{
+    opacity:1;
 }
 
 .flightPlane.arrival:after{
-    background:linear-gradient(90deg,transparent,#f2bf27,#ffe77f);
-    box-shadow:0 0 10px rgba(242,191,39,.9);
-    transform:rotate(-4deg);
+    background:linear-gradient(90deg,transparent,#f0c52e,#ffe98e);
+    box-shadow:0 0 11px rgba(240,197,46,.9);
+    transform:rotate(-7deg);
 }
 
 .popup.show .flightPlane.arrival{
-    animation:planeLand 2.5s ease-in-out infinite alternate;
+    animation:planeApproach 2.4s ease-in-out infinite alternate;
 }
 
 @keyframes planeTakeoff{
-    from{transform:rotate(-20deg) translate(-3px,5px)}
-    to{transform:rotate(-20deg) translate(7px,-5px)}
+    from{transform:rotate(-13deg) translate(-5px,5px)}
+    to{transform:rotate(-13deg) translate(8px,-7px)}
 }
 
-@keyframes planeLand{
-    from{transform:rotate(10deg) translate(-5px,-5px)}
-    to{transform:rotate(10deg) translate(6px,5px)}
+@keyframes planeApproach{
+    from{transform:rotate(-3deg) translate(-7px,-6px)}
+    to{transform:rotate(-3deg) translate(8px,5px)}
 }
 
 /* =====================================================
@@ -733,16 +782,25 @@ html,body{
 
     <div class="planeStage">
         <div id="flightPlane" class="flightPlane departure" aria-hidden="true">
-            <svg viewBox="0 0 220 105" focusable="false">
-                <!-- side-profile airliner silhouette -->
-                <path class="airframe" d="M9 59c22-7 47-13 76-18L124 10c5-4 11-6 17-6l7 2-20 32c16-1 32-1 48 1 12 1 23 6 29 12 4 4 3 9-2 12-8 5-19 8-34 9l-40 2-21 25-9 2 7-27-55-4-22 10-9-1 12-14-23-3z"/>
-                <path class="airframe" d="M102 66l-34 26-11-1 21-29z"/>
-                <path class="airframe" d="M158 68l21 23-10 1-31-22z"/>
-                <path class="detailsStroke" d="M139 45c15 0 30 1 42 3"/>
-                <path class="windows" d="M145 50h2m5 0h2m5 0h2m5 0h2m5 0h2"/>
-                <circle class="airframe" cx="140" cy="78" r="4"/>
-                <circle class="airframe" cx="153" cy="78" r="4"/>
-                <path class="airframe" d="M137 73h18v4h-18z"/>
+            <svg viewBox="0 0 240 110" focusable="false" aria-hidden="true">
+                <!-- unmistakable side-profile airliner, nose to the right -->
+                <path class="fuselage" d="M18 58 C55 52 103 48 165 48 L205 47 C218 47 229 51 235 57 C228 64 216 67 202 67 L164 67 C105 67 57 65 18 61 Z"/>
+                <path class="tail" d="M28 58 L12 31 L25 30 L52 53 Z"/>
+                <path class="tail" d="M31 62 L15 78 L28 80 L55 65 Z"/>
+                <path class="wing" d="M100 55 L72 16 L89 15 L139 52 Z"/>
+                <path class="wing" d="M108 64 L80 91 L96 93 L146 66 Z"/>
+                <ellipse class="engine" cx="132" cy="71" rx="12" ry="7"/>
+                <ellipse class="engine" cx="165" cy="70" rx="11" ry="6.5"/>
+                <path class="windowLine" d="M168 53 C188 52 205 53 218 57"/>
+                <path class="windowLine" d="M174 57 h2 m6 0 h2 m6 0 h2 m6 0 h2"/>
+                <!-- landing gear is revealed only for arrival -->
+                <g class="gear">
+                    <rect x="148" y="67" width="3" height="11" rx="1"/>
+                    <circle cx="147" cy="80" r="3.5"/>
+                    <circle cx="153" cy="80" r="3.5"/>
+                    <rect x="202" y="66" width="2.5" height="9" rx="1"/>
+                    <circle cx="203" cy="77" r="3"/>
+                </g>
             </svg>
         </div>
     </div>
@@ -832,25 +890,10 @@ html,body{
 
 
     <div class="rail">
-
-        <div
-            id="railTag"
-            class="railTag"
-        >
-            NEXT
+        <div id="railTag" class="railTag">LIVE TRAFFIC</div>
+        <div class="railViewport">
+            <div id="railTrack" class="railTrack" aria-live="off"></div>
         </div>
-
-        <div
-            id="railText"
-            class="railText"
-        >
-            <span class="railState">
-                WAITING
-            </span>
-
-            LIVE AIRCRAFT DATA
-        </div>
-
     </div>
 
 </div>
@@ -2958,7 +3001,9 @@ function movement(
 
 
 /* =====================================================
-   INFORMATION RAIL
+   CONTINUOUS LIVE TRAFFIC TICKER
+   Uses existing engine outputs only. No tracking logic
+   is changed. Items remain eligible for 60 seconds.
 ===================================================== */
 
 function railAllowed(ac,tag){
@@ -2977,15 +3022,12 @@ function railAllowed(ac,tag){
     return now-railShown.get(key)<60000;
 }
 
-
 function railItems(){
 
     const items=[];
 
     if(nextArrival && railAllowed(nextArrival.ac,"NEXT ARRIVAL")){
-
         ensureRoute(nextArrival.ac);
-
         items.push({
             tag:"NEXT ARRIVAL",
             state:"EXPECTED",
@@ -2996,9 +3038,7 @@ function railItems(){
     }
 
     if(nextDeparture && railAllowed(nextDeparture.ac,"NEXT DEPARTURE")){
-
         ensureRoute(nextDeparture.ac);
-
         items.push({
             tag:"NEXT DEPARTURE",
             state:"EXPECTED",
@@ -3013,9 +3053,7 @@ function railItems(){
         && Date.now()-lastMovement.time<60000
         && railAllowed(lastMovement.ac,lastMovement.state)
     ){
-
         ensureRoute(lastMovement.ac);
-
         items.push({
             tag:"LATEST",
             state:lastMovement.state,
@@ -3025,127 +3063,94 @@ function railItems(){
         });
     }
 
-    if(!items.length){
-
-        items.push({
-            tag:"PRG LIVE",
-            state:"LIVE",
-            text:AIRPORT.displayName+" • ADS-B BROADCAST"
-        });
-    }
-
     return items;
 }
 
+function tickerItemHTML(item){
+
+    if(!item || !item.ac)
+        return "";
+
+    const route=routeLabel(
+        item.ac,
+        item.routeState||item.state
+    );
+
+    const secondary=[];
+
+    if(route)
+        secondary.push(route);
+
+    if(item.extra)
+        secondary.push(item.extra);
+
+    const detail=aircraftDetail(item.ac);
+
+    return (
+        '<span class="tickerItem">'+
+        '<span class="tickerState '+(item.done?'done':'')+'">'+
+        item.state+
+        '</span>'+
+        aircraftTitle(item.ac)+
+        (detail ? '<span class="tickerSep">•</span>'+detail : '')+
+        (secondary.length ? '<span class="tickerSep">•</span><span class="tickerSecondary">'+secondary.join(' • ')+'</span>' : '')+
+        '</span>'
+    );
+}
+
+let lastTickerSignature="";
+
 function renderRail(){
 
-    const items=
-        railItems();
+    const track=document.getElementById("railTrack");
+    const tag=document.getElementById("railTag");
 
+    if(!track || !tag)
+        return;
 
-    const item=
-        items[
-            railIndex
-            %
-            items.length
-        ];
+    const items=railItems();
 
+    tag.textContent="LIVE TRAFFIC";
 
-    railIndex++;
+    let groupHTML="";
 
-
-    document
-    .getElementById(
-        "railTag"
-    )
-    .textContent=
-        item.tag;
-
-
-    const stateClass=
-        item.done
-        ?
-        "railState done"
-        :
-        "railState";
-
-
-    if(item.ac){
-
-        const route=
-            routeLabel(
-                item.ac,
-                item.routeState||item.state
-            );
-
-
-        const extraParts=[];
-
-        if(route)
-            extraParts.push(route);
-
-        if(item.extra)
-            extraParts.push(item.extra);
-
-        const extra=
-            extraParts.length
-            ?
-            " • "+extraParts.join(" • ")
-            :
-            "";
-
-
-        document
-        .getElementById(
-            "railText"
-        )
-        .innerHTML=
-
-            '<span class="'
-            +
-            stateClass
-            +
-            '">'
-            +
-            item.state
-            +
-            '</span>'
-            +
-            aircraftTitle(item.ac)
-            +
-            " • "
-            +
-            aircraftDetail(item.ac)
-            +
-            extra;
-
+    if(items.length){
+        groupHTML=items.map(tickerItemHTML).join("");
+    }
+    else{
+        groupHTML=
+            '<span class="tickerItem tickerIdle">'+
+            AIRPORT.displayName+
+            ' • LIVE ADS-B MONITORING'+
+            '</span>';
     }
 
-    else{
+    /* Repeat enough content that the crawl never leaves a blank screen.
+       Two identical halves allow a seamless -50% animation loop. */
+    const repeated=Array(4).fill(groupHTML).join("");
+    const signature=groupHTML;
 
-        document
-        .getElementById(
-            "railText"
-        )
-        .innerHTML=
+    if(signature!==lastTickerSignature){
+        track.innerHTML=
+            '<div class="tickerGroup">'+repeated+'</div>'+ 
+            '<div class="tickerGroup" aria-hidden="true">'+repeated+'</div>';
 
-            '<span class="railState">'
-            +
-            item.state
-            +
-            '</span>'
-            +
-            item.text;
+        /* Busy airports naturally create longer strings. Keep the motion
+           readable rather than accelerating the text. */
+        const chars=Math.max(80,repeated.replace(/<[^>]*>/g,"").length);
+        const seconds=Math.min(70,Math.max(28,chars*.12));
+        track.style.setProperty("--ticker-duration",seconds+"s");
+
+        /* restart at a clean seam whenever the underlying live data changes */
+        track.style.animation="none";
+        void track.offsetWidth;
+        track.style.animation="tickerFlow var(--ticker-duration,34s) linear infinite";
+
+        lastTickerSignature=signature;
     }
 }
 
-
-setInterval(
-    renderRail,
-    5500
-);
-
-
+setInterval(renderRail,3000);
 renderRail();
 
 
