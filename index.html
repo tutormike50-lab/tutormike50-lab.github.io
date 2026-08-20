@@ -768,6 +768,11 @@ html,body{
 
 
 /* =====================================================
+   MIKEAIRCRAFT 2.2 — YOLO-SAFE AVIATION BROADCAST HUD
+   No backdrop blur, no live-video filters, reduced compositing.
+===================================================== */
+
+/* =====================================================
    MIKEAIRCRAFT 2.0 — AVIATION BROADCAST HUD
    Visual layer only. Proven ADS-B selection engine remains intact.
 ===================================================== */
@@ -788,10 +793,9 @@ html,body{
 .ribbon{
     height:var(--ma2-ribbon);
     background:
-      linear-gradient(90deg,rgba(2,14,28,.985),rgba(3,42,72,.97) 46%,rgba(2,20,38,.985));
+      linear-gradient(90deg,#020e1c,#032a48 46%,#021426);
     border-top:1px solid rgba(129,207,255,.46);
-    box-shadow:0 -12px 32px rgba(0,0,0,.24),0 -1px 0 rgba(255,255,255,.08) inset;
-    backdrop-filter:blur(7px);
+    box-shadow:0 -2px 8px rgba(0,0,0,.24);
 }
 .main{height:calc(var(--ma2-ribbon) - var(--ma2-rail));}
 .ident{width:22%;padding:0 18px;border-right:1px solid var(--ma2-line);}
@@ -827,8 +831,8 @@ html,body{
     border:1px solid rgba(73,184,255,.72);
     border-radius:14px 14px 0 0;
     background:
-      linear-gradient(112deg,rgba(2,17,34,.975),rgba(4,41,72,.965) 58%,rgba(2,17,34,.985));
-    box-shadow:0 -14px 42px rgba(0,0,0,.30),0 0 26px rgba(28,157,239,.14),0 0 0 1px rgba(255,255,255,.05) inset;
+      linear-gradient(112deg,#021122,#042948 58%,#021122);
+    box-shadow:0 -4px 14px rgba(0,0,0,.28);
 }
 .popup:before{
     content:"";
@@ -907,9 +911,8 @@ html,body{
     padding:9px 11px 8px;
     border:1px solid rgba(117,204,255,.28);
     border-radius:9px;
-    background:linear-gradient(145deg,rgba(2,20,37,.91),rgba(3,36,62,.87));
-    box-shadow:0 8px 20px rgba(0,0,0,.22);
-    backdrop-filter:blur(6px);
+    background:linear-gradient(145deg,#021425,#03243e);
+    box-shadow:0 3px 8px rgba(0,0,0,.20);
 }
 .nextCardHead{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .nextKind{font-size:8px;font-weight:900;letter-spacing:1.35px;color:#8bd2f8;}
@@ -2889,7 +2892,8 @@ function liveAircraftDetail(ac){
 /* =====================================================
    OPTIONAL ROUTE / DESTINATION LOOKUP
 
-   Cached by callsign. Failure simply leaves route blank.
+   DISABLED IN 2.3 STABILITY BUILD. Helpers are retained for a
+   later controlled reintroduction, but no live code calls them.
 ===================================================== */
 
 function routeCallsign(ac){
@@ -3186,9 +3190,6 @@ function renderTrafficDeck(){
         document.getElementById("nextArrivalFlight").textContent=callsign(ac);
         document.getElementById("nextArrivalEta").textContent=nextArrival.distance.toFixed(1)+" KM";
         document.getElementById("nextArrivalSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"INBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"ARRIVAL"):"");
-        /* Route lookup is asynchronous, but the deck is refreshed by the
-           normal ADS-B cycle. Never recursively call renderTrafficDeck(). */
-        ensureRoute(ac);
     }
     else{
         arrCard.classList.add("empty");
@@ -3203,9 +3204,6 @@ function renderTrafficDeck(){
         document.getElementById("nextDepartureFlight").textContent=callsign(ac);
         document.getElementById("nextDepartureEta").textContent=Math.round(groundSpeed(ac))+" KT";
         document.getElementById("nextDepartureSub").textContent=(airlineName(ac)||aircraftDetail(ac)||"OUTBOUND")+(cachedRoute(ac)?" • "+routePairLabel(ac,"DEPARTURE"):"");
-        /* Route lookup is asynchronous, but the deck is refreshed by the
-           normal ADS-B cycle. Never recursively call renderTrafficDeck(). */
-        ensureRoute(ac);
     }
     else{
         depCard.classList.add("empty");
@@ -3267,13 +3265,9 @@ function showPopup(
     document.getElementById("popupAirline").textContent=airlineName(ac) || "COMMERCIAL AIRCRAFT";
     updatePopupEnrichment(ac,state,id);
 
-    /* Route enrichment is optional and never blocks the live event. */
-    ensureRoute(ac).then(()=>updatePopupEnrichment(ac,state,id));
-
     setPlaneGraphic(ac,state);
 
     popup.classList.remove("show");
-    void popup.offsetWidth;
     popup.classList.add("show");
 
     clearTimeout(popupTimer);
@@ -3336,7 +3330,6 @@ function railItems(){
     const items=[];
 
     if(nextArrival && railAllowed(nextArrival.ac,"NEXT ARRIVAL")){
-        ensureRoute(nextArrival.ac);
         items.push({
             tag:"NEXT ARRIVAL",
             state:"EXPECTED",
@@ -3347,7 +3340,6 @@ function railItems(){
     }
 
     if(nextDeparture && railAllowed(nextDeparture.ac,"NEXT DEPARTURE")){
-        ensureRoute(nextDeparture.ac);
         items.push({
             tag:"NEXT DEPARTURE",
             state:"EXPECTED",
@@ -3362,7 +3354,6 @@ function railItems(){
         && Date.now()-lastMovement.time<60000
         && railAllowed(lastMovement.ac,lastMovement.state)
     ){
-        ensureRoute(lastMovement.ac);
         items.push({
             tag:"LATEST",
             state:lastMovement.state,
@@ -3451,8 +3442,6 @@ function renderRail(){
         track.style.setProperty("--ticker-duration",seconds+"s");
 
         /* restart at a clean seam whenever the underlying live data changes */
-        track.style.animation="none";
-        void track.offsetWidth;
         track.style.animation="tickerFlow var(--ticker-duration,34s) linear infinite";
 
         lastTickerSignature=signature;
@@ -4049,11 +4038,26 @@ async function update(){
    START
 ===================================================== */
 
-update();
+let updateRunning=false;
 
+async function safeUpdate(){
+    if(updateRunning)
+        return;
+
+    updateRunning=true;
+
+    try{
+        await update();
+    }
+    finally{
+        updateRunning=false;
+    }
+}
+
+safeUpdate();
 
 setInterval(
-    update,
+    safeUpdate,
     3000
 );
 
