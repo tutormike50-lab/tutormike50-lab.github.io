@@ -945,54 +945,44 @@ catch(error){}
 const PRG_API=
 "https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
 
-function aircraftApiUrls(){
-
-    if(AIRPORT.code==="PRG"){
-        return [PRG_API+"?t="+Date.now()];
-    }
-
-    const lat=AIRPORT.lat;
-    const lon=AIRPORT.lon;
-    const radius=20;
-
-    /* Public ADS-B sources.  The tracking engine below is unchanged;
-       this layer only supplies the same {ac:[...]} aircraft format. */
-    return [
-        `https://api.adsb.lol/v2/point/${lat}/${lon}/${radius}`,
-        `https://api.airplanes.live/v2/point/${lat}/${lon}/${radius}`,
-        `https://opendata.adsb.fi/api/v2/lat/${lat}/lon/${lon}/dist/${radius}`
-    ];
-}
+/*
+   IMPORTANT: PRG keeps the proven feed above completely unchanged.
+   Other airports use our own Vercel server-side proxy, so the browser
+   never talks directly to public ADS-B services and therefore avoids
+   browser CORS / blocking problems.
+*/
+const NEARBY_API=
+"https://mikeaircraft-9hkn.vercel.app/api/nearby";
 
 async function fetchAircraftData(){
 
-    let lastError=null;
+    let url;
 
-    for(const url of aircraftApiUrls()){
-        try{
-            const response=await fetch(url,{cache:"no-store"});
-            if(!response.ok)
-                throw new Error("HTTP "+response.status);
+    if(AIRPORT.code==="PRG"){
+        url=PRG_API+"?t="+Date.now();
+    }
+    else{
+        const params=new URLSearchParams({
+            lat:String(AIRPORT.lat),
+            lon:String(AIRPORT.lon),
+            radius:"20",
+            t:String(Date.now())
+        });
 
-            const data=await response.json();
-            const ac=Array.isArray(data.ac)
-                ? data.ac
-                : Array.isArray(data.aircraft)
-                  ? data.aircraft
-                  : null;
-
-            if(!ac)
-                throw new Error("No aircraft array");
-
-            return {...data,ac};
-        }
-        catch(error){
-            lastError=error;
-            console.warn("ADS-B source unavailable",url,error);
-        }
+        url=NEARBY_API+"?"+params.toString();
     }
 
-    throw lastError || new Error("No ADS-B source available");
+    const response=await fetch(url,{cache:"no-store"});
+
+    if(!response.ok)
+        throw new Error("HTTP "+response.status);
+
+    const data=await response.json();
+
+    if(!Array.isArray(data.ac))
+        throw new Error("No aircraft array");
+
+    return data;
 }
 
 
