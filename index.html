@@ -1414,6 +1414,9 @@ let popupDirection=null;
 
 let popupAircraft=null;
 
+/* Fair popup scheduler: when arrival and departure compete, alternate. */
+let lastPopupChoice="ARRIVAL";
+
 let lastMovement=null;
 
 let nextArrival=null;
@@ -3392,6 +3395,10 @@ async function update(){
 
         /* =============================================
            TOUCHDOWN
+
+           Record it, but DO NOT return from the update.
+           At busy hubs a touchdown must not prevent the
+           departure detector from running in the same cycle.
         ============================================= */
 
         const touchdown=
@@ -3434,9 +3441,6 @@ async function update(){
                 touchdown,
                 "ARRIVED"
             );
-
-
-            return;
         }
 
 
@@ -3471,28 +3475,18 @@ async function update(){
         );
 
 
-        if(finals.length){
-
-            showPopup(
-                finals[0].ac,
-                "ARRIVAL"
-            );
-
-
-            if(
-                finals[0]
-                .distance
-                <=
-                1.5
-            ){
-
-                return;
-            }
-        }
+        const arrivalPopupCandidate=
+            finals.length
+            ? finals[0].ac
+            : null;
 
 
         /* =============================================
            TAKEOFF ROLL
+
+           Always evaluate this even when an arrival is
+           on final. This removes the arrival-first bias
+           that was most noticeable at LHR/FRA/AMS/CDG.
         ============================================= */
 
         let bestDeparture=
@@ -3535,26 +3529,26 @@ async function update(){
         }
 
 
+        let departurePopupCandidate=
+            null;
+
+
         if(bestDeparture){
 
             activeDeparture=
                 bestDeparture.id;
 
-
-            showPopup(
-                bestDeparture.ac,
-                "DEPARTURE"
-            );
-
-
-            return;
+            departurePopupCandidate=
+                bestDeparture.ac;
         }
 
 
         /* =============================================
            ACTIVE DEPARTURE
 
-           Keep tracking until 2000 ft.
+           Continue tracking to 2000 ft, but do not block
+           the rest of this update cycle. The popup itself
+           remains one-shot per aircraft.
         ============================================= */
 
         if(activeDeparture){
@@ -3584,10 +3578,11 @@ async function update(){
                     );
 
 
-                    showPopup(
-                        ac,
-                        "DEPARTURE"
-                    );
+                    if(!departurePopupCandidate){
+
+                        departurePopupCandidate=
+                            ac;
+                    }
 
 
                     if(
@@ -3599,19 +3594,7 @@ async function update(){
                         activeDeparture=
                             null;
                     }
-
-                    else{
-
-                        return;
-                    }
-
                 }
-
-                else{
-
-                    return;
-                }
-
             }
 
             else{
@@ -3687,13 +3670,105 @@ async function update(){
             );
 
 
-            showPopup(
-                airborne.ac,
-                "DEPARTURE"
-            );
+            if(!departurePopupCandidate){
+
+                departurePopupCandidate=
+                    airborne.ac;
+            }
+        }
 
 
-            return;
+        /* =============================================
+           FAIR POPUP SCHEDULER
+
+           Detection above is unchanged. This section only
+           decides which already-qualified movement gets the
+           15-second information box when both compete.
+
+           - If only one side is eligible, show that side.
+           - If both are eligible, alternate ARRIVAL/DEPARTURE.
+           - A popup already on screen is never interrupted.
+           - Aircraft already shown remain one-shot as before.
+        ============================================= */
+
+        const popupFree=
+            Date.now()>=popupBusyUntil;
+
+
+        if(popupFree){
+
+            const arrivalEligible=
+                arrivalPopupCandidate
+                &&
+                !popupShown.has(
+                    aircraftId(
+                        arrivalPopupCandidate
+                    )
+                );
+
+
+            const departureEligible=
+                departurePopupCandidate
+                &&
+                !popupShown.has(
+                    aircraftId(
+                        departurePopupCandidate
+                    )
+                );
+
+
+            if(
+                arrivalEligible
+                &&
+                departureEligible
+            ){
+
+                if(
+                    lastPopupChoice==="ARRIVAL"
+                ){
+
+                    showPopup(
+                        departurePopupCandidate,
+                        "DEPARTURE"
+                    );
+
+                    lastPopupChoice=
+                        "DEPARTURE";
+                }
+
+                else{
+
+                    showPopup(
+                        arrivalPopupCandidate,
+                        "ARRIVAL"
+                    );
+
+                    lastPopupChoice=
+                        "ARRIVAL";
+                }
+            }
+
+            else if(departureEligible){
+
+                showPopup(
+                    departurePopupCandidate,
+                    "DEPARTURE"
+                );
+
+                lastPopupChoice=
+                    "DEPARTURE";
+            }
+
+            else if(arrivalEligible){
+
+                showPopup(
+                    arrivalPopupCandidate,
+                    "ARRIVAL"
+                );
+
+                lastPopupChoice=
+                    "ARRIVAL";
+            }
         }
 
     }
