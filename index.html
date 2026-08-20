@@ -389,55 +389,45 @@ html,body{
 }
 
 /* =====================================================
-   AIRCRAFT ALERT PANEL
+   AIRCRAFT ALERT PANEL — BROADCAST CARD
+   Presentation only. Tracking engine is unchanged.
 ===================================================== */
 
 .popup{
     position:absolute;
-
-    left:22px;
+    left:24px;
     bottom:var(--ribbon);
 
-    width:560px;
-    height:164px;
+    width:650px;
+    height:188px;
 
     display:flex;
-    align-items:center;
+    align-items:stretch;
 
-    padding:14px;
+    padding:0;
+    overflow:hidden;
 
     background:
-        linear-gradient(
-            135deg,
-            rgba(3,22,40,.995),
-            rgba(0,71,124,.985)
-        );
+        linear-gradient(135deg,
+            rgba(2,22,51,.985) 0%,
+            rgba(2,34,73,.985) 55%,
+            rgba(1,17,42,.99) 100%);
 
-    border:
-        1px solid
-        rgba(191,224,244,.78);
-
-    border-bottom:
-        4px solid
-        var(--yellow);
-
-    border-radius:
-        14px 14px 0 0;
+    border:2px solid #39a8ff;
+    border-radius:18px 18px 0 0;
 
     box-shadow:
-        0 -10px 28px
-        rgba(0,0,0,.38);
+        0 0 0 1px rgba(255,255,255,.08) inset,
+        0 0 22px rgba(20,137,255,.42),
+        0 -12px 34px rgba(0,0,0,.36);
 
     z-index:45;
 
-    transform:
-        translateY(112%);
-
+    transform:translateY(112%);
     opacity:0;
 
     transition:
-        transform .46s
-        cubic-bezier(.22,.8,.25,1),
+        transform .46s cubic-bezier(.22,.8,.25,1),
         opacity .22s ease;
 
     pointer-events:none;
@@ -448,95 +438,233 @@ html,body{
     opacity:1;
 }
 
-.popup.departure{
-    border-bottom-color:
-        var(--orange);
+/* keep a single blue broadcast language for both states */
+.popup.departure,
+.popup.arrival{
+    border-color:#39a8ff;
 }
 
 /* =====================================================
-   AIRCRAFT DIRECTION CARD
+   DYNAMIC AIRCRAFT GRAPHIC
 ===================================================== */
 
-.planeCard{
-    width:158px;
-    height:134px;
-    flex:0 0 auto;
-    border-radius:10px;
+.planeStage{
+    position:relative;
+    width:235px;
+    flex:0 0 235px;
+    overflow:hidden;
+
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:8px;
+
+    border-right:1px solid rgba(255,255,255,.18);
+
     background:
-        linear-gradient(145deg,#0c253b,#0c4168);
-    border:1px solid rgba(255,255,255,.24);
+        radial-gradient(circle at 45% 48%,rgba(39,142,255,.18),transparent 52%),
+        linear-gradient(135deg,rgba(8,56,111,.26),rgba(1,15,36,.12));
 }
 
-.planeIcon{
-    width:70px;
-    height:70px;
+.planeStage:before{
+    content:"";
+    position:absolute;
+    left:24px;
+    top:30px;
+    bottom:30px;
+    width:3px;
+    border-radius:3px;
+    background:#2f9dff;
+    box-shadow:0 0 12px rgba(47,157,255,.72);
+}
+
+.flightPlane{
+    position:relative;
+    width:168px;
+    height:92px;
+    margin-left:24px;
     color:#fff;
-    filter:drop-shadow(0 4px 6px rgba(0,0,0,.42));
-    transition:transform .35s ease;
+    filter:
+        drop-shadow(0 4px 4px rgba(0,0,0,.36))
+        drop-shadow(0 0 8px rgba(255,255,255,.18));
+    transform-origin:48% 55%;
 }
 
-.planeIcon svg{
+.flightPlane svg{
     width:100%;
     height:100%;
     display:block;
+    overflow:visible;
+}
+
+.flightPlane .airframe{
     fill:currentColor;
 }
 
-.planeIcon.departure{
-    transform:rotate(-45deg);
+.flightPlane .windows,
+.flightPlane .detailsStroke{
+    fill:none;
+    stroke:rgba(4,34,70,.62);
+    stroke-width:1.5;
+    stroke-linecap:round;
 }
 
-.planeIcon.arrival{
-    transform:rotate(135deg);
+.flightPlane:after{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    left:-52px;
+    top:49%;
+    width:95px;
+    height:4px;
+    border-radius:100%;
+    opacity:.9;
+    transform-origin:right center;
 }
 
-.planeRoute{
-    max-width:138px;
-    text-align:center;
-    font-size:13px;
+.flightPlane.departure{
+    transform:rotate(-20deg) translateY(4px);
+}
+
+.flightPlane.departure:after{
+    background:linear-gradient(90deg,transparent,#168cff,#7ac7ff);
+    box-shadow:0 0 12px #168cff;
+    transform:rotate(3deg);
+}
+
+.popup.show .flightPlane.departure{
+    animation:planeTakeoff 2.5s ease-in-out infinite alternate;
+}
+
+.flightPlane.arrival{
+    transform:rotate(10deg) translateY(-2px);
+}
+
+.flightPlane.arrival:after{
+    background:linear-gradient(90deg,transparent,#f2bf27,#ffe77f);
+    box-shadow:0 0 10px rgba(242,191,39,.9);
+    transform:rotate(-4deg);
+}
+
+.popup.show .flightPlane.arrival{
+    animation:planeLand 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes planeTakeoff{
+    from{transform:rotate(-20deg) translate(-3px,5px)}
+    to{transform:rotate(-20deg) translate(7px,-5px)}
+}
+
+@keyframes planeLand{
+    from{transform:rotate(10deg) translate(-5px,-5px)}
+    to{transform:rotate(10deg) translate(6px,5px)}
+}
+
+/* =====================================================
+   POPUP TYPOGRAPHY
+===================================================== */
+
+.popupInfo{
+    flex:1;
+    min-width:0;
+    position:relative;
+    padding:30px 30px 22px 32px;
+}
+
+.state{
+    position:absolute;
+    top:18px;
+    right:26px;
+
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:1.8px;
+
+    color:#ffd451;
+}
+
+.state:after{
+    content:"";
+    display:inline-block;
+    width:8px;
+    height:8px;
+    margin-left:9px;
+    border-radius:50%;
+    background:#39a8ff;
+    box-shadow:0 0 8px rgba(57,168,255,.8);
+}
+
+.flight{
+    margin-top:30px;
+    padding-right:80px;
+
+    font-size:34px;
+    line-height:1;
     font-weight:900;
     letter-spacing:1px;
+
     color:#fff;
+
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 }
 
-.popupInfo{
-    flex:1;
-    min-width:0;
-    padding-left:20px;
-}
-
-.state{
-    font-size:39px;
+.airlineLine{
+    margin-top:14px;
+    font-size:18px;
     font-weight:900;
-    letter-spacing:3px;
-    line-height:1;
-}
-
-.flight{
-    margin-top:11px;
-    font-size:21px;
-    font-weight:900;
+    letter-spacing:.8px;
+    color:#ffd451;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 }
 
 .details{
-    margin-top:7px;
-    font-size:14px;
-    font-weight:700;
-    color:#d5e5ee;
+    margin-top:10px;
+    font-size:16px;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:.35px;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+}
+
+.details .secondary{
+    color:#ffd451;
+}
+
+.warning{
+    color:#ff5757 !important;
+}
+
+.popupProgress{
+    position:absolute;
+    left:32px;
+    right:30px;
+    bottom:20px;
+    height:4px;
+    border-radius:4px;
+    overflow:hidden;
+    background:rgba(255,255,255,.17);
+}
+
+.popupProgress span{
+    display:block;
+    width:100%;
+    height:100%;
+    transform-origin:left center;
+    background:linear-gradient(90deg,#168cff,#75c6ff);
+}
+
+.popup.show .popupProgress span{
+    animation:popupCountdown 15s linear forwards;
+}
+
+@keyframes popupCountdown{
+    from{transform:scaleX(1)}
+    to{transform:scaleX(0)}
 }
 
 /* =====================================================
@@ -601,49 +729,30 @@ html,body{
      AIRCRAFT POPUP
 ===================================================== -->
 
-<div
-    id="popup"
-    class="popup"
->
+<div id="popup" class="popup">
 
-    <div class="planeCard">
-
-        <div
-            id="planeIcon"
-            class="planeIcon departure"
-            aria-hidden="true"
-        >
-            <svg viewBox="0 0 64 64" focusable="false">
-                <path d="M32 3c2.2 0 3.4 2.5 4 4.7l4.8 18.1 15.9 9.4c1.5.9 2.4 2.5 2.4 4.2v3.3L39 37.9l-2.2 13.7 6.7 5.1v3.4L32 57l-11.5 3.1v-3.4l6.7-5.1L25 37.9 4.9 42.7v-3.3c0-1.7.9-3.3 2.4-4.2l15.9-9.4L28 7.7C28.6 5.5 29.8 3 32 3z"/>
+    <div class="planeStage">
+        <div id="flightPlane" class="flightPlane departure" aria-hidden="true">
+            <svg viewBox="0 0 220 105" focusable="false">
+                <!-- side-profile airliner silhouette -->
+                <path class="airframe" d="M9 59c22-7 47-13 76-18L124 10c5-4 11-6 17-6l7 2-20 32c16-1 32-1 48 1 12 1 23 6 29 12 4 4 3 9-2 12-8 5-19 8-34 9l-40 2-21 25-9 2 7-27-55-4-22 10-9-1 12-14-23-3z"/>
+                <path class="airframe" d="M102 66l-34 26-11-1 21-29z"/>
+                <path class="airframe" d="M158 68l21 23-10 1-31-22z"/>
+                <path class="detailsStroke" d="M139 45c15 0 30 1 42 3"/>
+                <path class="windows" d="M145 50h2m5 0h2m5 0h2m5 0h2m5 0h2"/>
+                <circle class="airframe" cx="140" cy="78" r="4"/>
+                <circle class="airframe" cx="153" cy="78" r="4"/>
+                <path class="airframe" d="M137 73h18v4h-18z"/>
             </svg>
         </div>
-
-        <div
-            id="planeRoute"
-            class="planeRoute"
-        ></div>
-
     </div>
 
     <div class="popupInfo">
-
-        <div
-            id="popupState"
-            class="state"
-        >
-            ARRIVAL
-        </div>
-
-        <div
-            id="popupFlight"
-            class="flight"
-        ></div>
-
-        <div
-            id="popupDetails"
-            class="details"
-        ></div>
-
+        <div id="popupState" class="state">ARRIVAL</div>
+        <div id="popupFlight" class="flight"></div>
+        <div id="popupAirline" class="airlineLine"></div>
+        <div id="popupDetails" class="details"></div>
+        <div class="popupProgress"><span></span></div>
     </div>
 
 </div>
@@ -2758,14 +2867,11 @@ function routePairLabel(ac,state){
 
 function setPlaneGraphic(ac,state){
 
-    const icon=document.getElementById("planeIcon");
-    const route=document.getElementById("planeRoute");
+    const plane=document.getElementById("flightPlane");
 
-    icon.className=
-        "planeIcon "+
+    plane.className=
+        "flightPlane "+
         (state==="DEPARTURE" ? "departure" : "arrival");
-
-    route.textContent=routePairLabel(ac,state);
 }
 
 /* =====================================================
@@ -2805,37 +2911,18 @@ function showPopup(
 
     popup.className=
         "popup "+
-        (state==="DEPARTURE" ? "departure" : "");
+        (state==="DEPARTURE" ? "departure" : "arrival");
 
     document.getElementById("popupState").textContent=state;
-    document.getElementById("popupFlight").textContent=aircraftTitle(ac);
+    document.getElementById("popupFlight").textContent=callsign(ac);
+    document.getElementById("popupAirline").textContent=airlineName(ac) || "COMMERCIAL AIRCRAFT";
+    document.getElementById("popupDetails").textContent=liveAircraftDetail(ac);
 
-    const paintDetails=()=>{
-
-        const parts=[liveAircraftDetail(ac)];
-        const route=routeLabel(ac,state);
-
-        if(route)
-            parts.push(route);
-
-        document.getElementById("popupDetails").textContent=
-            parts.filter(Boolean).join(" • ");
-    };
-
-    paintDetails();
     setPlaneGraphic(ac,state);
 
     popup.classList.remove("show");
     void popup.offsetWidth;
     popup.classList.add("show");
-
-    /* Route enrichment is optional and asynchronous. */
-    ensureRoute(ac).then(()=>{
-        if(popupAircraft===id && popupDirection===state){
-            paintDetails();
-            setPlaneGraphic(ac,state);
-        }
-    });
 
     clearTimeout(popupTimer);
 
