@@ -945,20 +945,54 @@ catch(error){}
 const PRG_API=
 "https://mikeaircraft-9hkn-186rknjwy-mikeplanes.vercel.app/api/aircraft";
 
-function aircraftApiUrl(){
+function aircraftApiUrls(){
 
     if(AIRPORT.code==="PRG"){
-        return PRG_API+"?t="+Date.now();
+        return [PRG_API+"?t="+Date.now()];
     }
 
-    return (
-        "https://api.adsb.lol/v2/lat/"
-        +AIRPORT.lat
-        +"/lon/"
-        +AIRPORT.lon
-        +"/dist/15?t="
-        +Date.now()
-    );
+    const lat=AIRPORT.lat;
+    const lon=AIRPORT.lon;
+    const radius=20;
+
+    /* Public ADS-B sources.  The tracking engine below is unchanged;
+       this layer only supplies the same {ac:[...]} aircraft format. */
+    return [
+        `https://api.adsb.lol/v2/point/${lat}/${lon}/${radius}`,
+        `https://api.airplanes.live/v2/point/${lat}/${lon}/${radius}`,
+        `https://opendata.adsb.fi/api/v2/lat/${lat}/lon/${lon}/dist/${radius}`
+    ];
+}
+
+async function fetchAircraftData(){
+
+    let lastError=null;
+
+    for(const url of aircraftApiUrls()){
+        try{
+            const response=await fetch(url,{cache:"no-store"});
+            if(!response.ok)
+                throw new Error("HTTP "+response.status);
+
+            const data=await response.json();
+            const ac=Array.isArray(data.ac)
+                ? data.ac
+                : Array.isArray(data.aircraft)
+                  ? data.aircraft
+                  : null;
+
+            if(!ac)
+                throw new Error("No aircraft array");
+
+            return {...data,ac};
+        }
+        catch(error){
+            lastError=error;
+            console.warn("ADS-B source unavailable",url,error);
+        }
+    }
+
+    throw lastError || new Error("No ADS-B source available");
 }
 
 
@@ -3245,30 +3279,8 @@ async function update(){
 
     try{
 
-        const response=
-            await fetch(
-
-                aircraftApiUrl(),
-
-                {
-                    cache:"no-store"
-                }
-
-            );
-
-
-        if(!response.ok){
-
-            throw new Error(
-                "HTTP "
-                +
-                response.status
-            );
-        }
-
-
         const data=
-            await response.json();
+            await fetchAircraftData();
 
 
         /* Show total feed count so we know
