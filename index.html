@@ -565,9 +565,9 @@ html,body{
 
 /* departure: aircraft pitches up and climbs gently */
 .flightPlane.departure{
-    /* Mirror the SVG horizontally so the aircraft faces left but stays
-       upright. Then apply only a small fixed climb angle. */
-    transform:translate(0,3px) rotate(7deg) scaleX(-1);
+    /* Upright side-profile, nose to the right, with a small fixed
+       climb angle. No ADS-B heading rotation is used. */
+    transform:rotate(-7deg) translate(0,3px);
 }
 
 .flightPlane.departure:after{
@@ -583,8 +583,9 @@ html,body{
 /* arrival: aircraft remains believable/near-level, gear down,
    while the whole silhouette follows a shallow descending path */
 .flightPlane.arrival{
-    /* Left-facing, upright aircraft with a small fixed descent angle. */
-    transform:translate(0,-2px) rotate(-3deg) scaleX(-1);
+    /* Upright side-profile, nose to the right, with a small fixed
+       descent angle. No ADS-B heading rotation is used. */
+    transform:rotate(3deg) translate(0,-2px);
 }
 
 .flightPlane.arrival .gear{
@@ -602,13 +603,13 @@ html,body{
 }
 
 @keyframes planeTakeoff{
-    from{transform:translate(5px,5px) rotate(7deg) scaleX(-1)}
-    to{transform:translate(-8px,-7px) rotate(7deg) scaleX(-1)}
+    from{transform:translate(-5px,5px) rotate(-7deg)}
+    to{transform:translate(8px,-7px) rotate(-7deg)}
 }
 
 @keyframes planeApproach{
-    from{transform:translate(7px,-6px) rotate(-3deg) scaleX(-1)}
-    to{transform:translate(-8px,5px) rotate(-3deg) scaleX(-1)}
+    from{transform:translate(-7px,-6px) rotate(3deg)}
+    to{transform:translate(8px,5px) rotate(3deg)}
 }
 
 /* =====================================================
